@@ -1,0 +1,620 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#08090d !important; color:#eef0f5 !important; margin:0; overflow-x:hidden; }
+  :root {
+    --gold:#c9a84c; --gold2:#e8c97a; --teal:#2dd4bf;
+    --bg:#08090d; --surface:rgba(255,255,255,.03);
+    --border:rgba(255,255,255,.07);
+    --text:rgba(238,240,245,.85);
+    --muted:rgba(238,240,245,.38);
+  }
+  .bk-shell {
+    min-height: calc(100vh - 64px);
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+  .bk-shell::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 60% 45% at 0% 0%,   rgba(201,168,76,.06) 0%,transparent 55%),
+      radial-gradient(ellipse 50% 50% at 100% 100%,rgba(45,212,191,.04) 0%,transparent 55%);
+  }
+  .bk-topbar {
+    position: sticky; top: 62px; z-index: 80;
+    background: rgba(8,9,13,.92);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: .65rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .bk-topbar-title {
+    font-family: 'Lora', serif;
+    font-size: .88rem; font-weight: 500;
+    color: var(--gold2); flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .bk-page-indicator {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .72rem; color: var(--muted);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .bk-page-current { font-size: .9rem; font-weight: 700; color: var(--gold2); }
+  .bk-progress-wrap {
+    flex: 1; max-width: 200px;
+    height: 3px; border-radius: 2px;
+    background: rgba(255,255,255,.07);
+    overflow: hidden; flex-shrink: 0;
+  }
+  .bk-progress-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg,#9a6a22,var(--gold),var(--gold2));
+    transition: width .4s ease;
+    box-shadow: 0 0 8px rgba(201,168,76,.5);
+  }
+  .bk-pct-lbl { font-size: .7rem; font-weight: 700; color: var(--gold); min-width: 30px; text-align: right; }
+  .bk-ctrl-group { display:flex; align-items:center; gap:.3rem; flex-shrink:0; }
+  .bk-ctrl-btn {
+    width:26px; height:26px; border-radius:6px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    color: var(--muted); font-size:.72rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .15s; user-select:none;
+  }
+  .bk-ctrl-btn:hover { background:rgba(255,255,255,.09); color:#eef0f5; }
+  .bk-ctrl-lbl { font-size:.68rem; color:var(--muted); min-width:22px; text-align:center; }
+  .bk-themes { display:flex; gap:.28rem; flex-shrink:0; }
+  .bk-theme-dot {
+    width:18px; height:18px; border-radius:50%;
+    border: 1.5px solid rgba(255,255,255,.12);
+    cursor:pointer; transition:all .15s;
+  }
+  .bk-theme-dot.active { border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,168,76,.4); }
+  .bk-theme-dot.td { background:#08090d; }
+  .bk-theme-dot.ts { background:#1a150e; }
+  .bk-theme-dot.ti { background:#f5f0e8; }
+  .bk-hero {
+    position: relative; z-index:1;
+    padding: 2.5rem 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(160deg,rgba(201,168,76,.04) 0%,transparent 60%);
+    display: none;
+  }
+  .bk-hero.visible { display: block; }
+  .bk-hero-inner { max-width: 720px; margin: 0 auto; display:flex; gap:2rem; align-items:flex-start; }
+  .bk-cover {
+    width:90px; height:125px; flex-shrink:0;
+    border-radius:8px;
+    background:linear-gradient(135deg,#111620,#1e2535);
+    border:1px solid rgba(255,255,255,.07);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+    box-shadow:4px 6px 24px rgba(0,0,0,.6), -2px -2px 0 rgba(255,255,255,.04);
+  }
+  .bk-cover::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:5px;
+    background:linear-gradient(180deg,var(--gold),rgba(201,168,76,.15));
+  }
+  .bk-cover svg { color:rgba(201,168,76,.18); width:30px; height:30px; }
+  .bk-hero-body { flex:1; }
+  .bk-hero-id {
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.22rem .7rem;
+    background:rgba(201,168,76,.1); border:1px solid rgba(201,168,76,.2);
+    border-radius:999px; font-size:.65rem; font-weight:600;
+    color:var(--gold); letter-spacing:.1em; text-transform:uppercase;
+    margin-bottom:.7rem;
+  }
+  .bk-hero-id-dot { width:4px; height:4px; border-radius:50%; background:var(--gold); box-shadow:0 0 5px rgba(201,168,76,.7); animation:bkPulse 2s ease-in-out infinite; }
+  @keyframes bkPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .bk-hero-title {
+    font-family:'Lora',serif; font-size:clamp(1.5rem,3.5vw,2.2rem);
+    font-weight:600; line-height:1.2; color:#f1f0ff;
+    letter-spacing:-.01em; margin-bottom:.65rem;
+  }
+  .bk-hero-meta { display:flex; flex-wrap:wrap; gap:.55rem; margin-bottom:.9rem; }
+  .bk-hero-meta span { font-size:.72rem; color:var(--muted); display:flex; align-items:center; gap:.3rem; }
+  .bk-hero-meta svg { width:11px; height:11px; }
+  .bk-price-row { display:flex; align-items:baseline; gap:.5rem; margin-bottom:1rem; }
+  .bk-price { font-size:1.2rem; font-weight:800; color:var(--gold2); }
+  .bk-price-strike { font-size:.82rem; color:rgba(238,240,245,.28); text-decoration:line-through; }
+  .bk-save { display:inline-flex; padding:.16rem .5rem; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.2); border-radius:999px; font-size:.62rem; font-weight:700; color:#4ade80; }
+  .bk-hero-actions { display:flex; flex-wrap:wrap; gap:.55rem; align-items:center; }
+  .bk-action-btn {
+    display:inline-flex; align-items:center; gap:.38rem;
+    padding:.5rem .95rem; border-radius:8px;
+    font-size:.76rem; font-weight:600;
+    text-decoration:none; border:none; cursor:pointer;
+    font-family:'DM Sans',system-ui,sans-serif; transition:all .2s;
+  }
+  .bk-action-btn svg { width:12px; height:12px; }
+  .bk-btn-rent { background:linear-gradient(135deg,#9a6a22,var(--gold)); color:#08090d; box-shadow:0 3px 12px rgba(201,168,76,.28); }
+  .bk-btn-rent:hover { box-shadow:0 5px 20px rgba(201,168,76,.42); transform:translateY(-1px); }
+  .bk-btn-rented {
+    display:inline-flex; align-items:center; gap:.38rem;
+    padding:.5rem .95rem; border-radius:8px;
+    font-size:.76rem; font-weight:600;
+    background:rgba(34,197,94,.1);
+    border:1px solid rgba(34,197,94,.22);
+    color:#4ade80; cursor:default;
+  }
+  .bk-btn-edit { background:rgba(45,212,191,.1); border:1px solid rgba(45,212,191,.22)!important; color:var(--teal); }
+  .bk-btn-edit:hover { background:rgba(45,212,191,.18); }
+  .bk-btn-del  { background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.2)!important; color:#f87171; }
+  .bk-btn-del:hover  { background:rgba(248,113,113,.15); }
+  .bk-preview-banner {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.85rem 1.1rem; margin-top:1rem;
+    background:rgba(201,168,76,.07);
+    border:1px solid rgba(201,168,76,.18);
+    border-radius:12px;
+    font-size:.8rem; color:rgba(238,240,245,.65);
+    line-height:1.5;
+  }
+  .bk-preview-banner svg { flex-shrink:0; }
+  .bk-preview-rent-btn {
+    margin-left:auto; flex-shrink:0;
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.4rem .9rem; border-radius:8px;
+    background:linear-gradient(135deg,#9a6a22,#c9a84c);
+    color:#0b0c10; font-size:.75rem; font-weight:700;
+    text-decoration:none; white-space:nowrap; transition:all .2s;
+  }
+  .bk-preview-rent-btn:hover { box-shadow:0 4px 16px rgba(201,168,76,.35); transform:translateY(-1px); }
+  .bk-reader {
+    flex: 1; position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    max-width: 720px; width: 100%; margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  .bk-stats-strip {
+    display: flex; align-items: center; gap: 1rem;
+    padding: .75rem 0; margin-top: .5rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .bk-stat-chip { display:flex; align-items:center; gap:.38rem; font-size:.72rem; color:var(--muted); }
+  .bk-stat-chip svg { width:12px; height:12px; color:rgba(201,168,76,.55); }
+  .bk-stat-chip strong { color:rgba(238,240,245,.65); font-weight:600; }
+  .bk-page-area {
+    position: relative;
+    padding: 2.5rem 0 2rem;
+    min-height: 60vh;
+    flex: 1;
+  }
+  .bk-page-content {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.9;
+    color: var(--text);
+    letter-spacing: .01em;
+    word-spacing: .03em;
+    transition: opacity .25s, transform .25s;
+  }
+  .bk-page-content.flip-out { opacity: 0; transform: translateX(-18px); }
+  .bk-page-content.flip-in { animation: bkFlipIn .3s ease both; }
+  @keyframes bkFlipIn { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
+  .bk-page-content.flip-in-back { animation: bkFlipInBack .3s ease both; }
+  @keyframes bkFlipInBack { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:translateX(0); } }
+  .bk-drop-cap::first-letter {
+    font-size: 3.8em; font-weight:600;
+    float:left; line-height:.72;
+    margin:.06em .14em 0 0;
+    color:var(--gold);
+    font-family:'Lora',serif;
+    text-shadow:0 0 20px rgba(201,168,76,.3);
+  }
+  .bk-page-num-watermark {
+    position:absolute; bottom:.5rem; right:0;
+    font-size:.65rem; color:rgba(238,240,245,.12);
+    font-family:'DM Sans',sans-serif; letter-spacing:.08em;
+    user-select:none; pointer-events:none;
+  }
+  .bk-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 0 2rem;
+    border-top: 1px solid var(--border);
+    gap: 1rem;
+  }
+  .bk-nav-btn {
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.65rem 1.25rem; border-radius:10px;
+    font-size:.82rem; font-weight:600;
+    border: 1px solid var(--border);
+    background:rgba(255,255,255,.03);
+    color:var(--muted); cursor:pointer;
+    font-family:'DM Sans',system-ui,sans-serif;
+    transition:all .2s; text-decoration:none; user-select:none;
+  }
+  .bk-nav-btn:hover:not(:disabled) { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.13); color:#eef0f5; }
+  .bk-nav-btn:disabled { opacity:.25; cursor:not-allowed; }
+  .bk-nav-btn svg { width:14px; height:14px; }
+  .bk-nav-btn.next-btn {
+    background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.06));
+    border-color:rgba(201,168,76,.22); color:var(--gold2);
+  }
+  .bk-nav-btn.next-btn:hover:not(:disabled) {
+    background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.1));
+    border-color:rgba(201,168,76,.4); box-shadow:0 4px 16px rgba(201,168,76,.15);
+  }
+  .bk-page-bubbles {
+    display:flex; gap:.4rem; align-items:center; flex-wrap:wrap; justify-content:center; max-width:240px;
+  }
+  .bk-bubble {
+    width:8px; height:8px; border-radius:50%;
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.07);
+    cursor:pointer; transition:all .2s; flex-shrink:0;
+  }
+  .bk-bubble.read { background:rgba(201,168,76,.4); border-color:rgba(201,168,76,.3); }
+  .bk-bubble.current { background:var(--gold); border-color:var(--gold); box-shadow:0 0 8px rgba(201,168,76,.6); transform:scale(1.3); }
+  .bk-end-card {
+    margin:1.5rem 0 3rem; padding:2rem;
+    background:linear-gradient(135deg,rgba(201,168,76,.07),rgba(45,212,191,.04));
+    border:1px solid rgba(255,255,255,.08); border-radius:20px;
+    text-align:center; display:flex; flex-direction:column; align-items:center; gap:1rem;
+    animation:bkFlipIn .4s ease both;
+  }
+  .bk-end-icon {
+    width:52px; height:52px; border-radius:15px;
+    background:linear-gradient(135deg,#9a6a22,var(--gold));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 20px rgba(201,168,76,.35);
+  }
+  .bk-end-icon svg { width:24px; height:24px; }
+  .bk-end-title { font-size:1.1rem; font-weight:700; color:#eef0f5; }
+  .bk-end-sub { font-size:.83rem; color:var(--muted); max-width:360px; line-height:1.6; }
+  .bk-end-stats {
+    display:flex; gap:1.5rem; padding:.85rem 1.5rem;
+    background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px;
+  }
+  .bk-end-stat-num { font-size:1.3rem; font-weight:800; color:var(--gold2); }
+  .bk-end-stat-lbl { font-size:.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:.1rem; }
+  body.bk-sepia { background:#100d08 !important; }
+  body.bk-sepia .bk-shell, body.bk-sepia .bk-topbar, body.bk-sepia .bk-hero { background-color:#100d08 !important; }
+  body.bk-sepia .bk-page-content { color:rgba(210,185,145,.88) !important; }
+  body.bk-ivory { background:#f0ebe0 !important; }
+  body.bk-ivory .bk-shell { background:#f0ebe0 !important; }
+  body.bk-ivory .bk-topbar { background:rgba(240,235,224,.95) !important; border-color:rgba(0,0,0,.08) !important; }
+  body.bk-ivory .bk-topbar-title { color:#4a3728 !important; }
+  body.bk-ivory .bk-page-indicator, body.bk-ivory .bk-ctrl-lbl { color:rgba(74,55,40,.5) !important; }
+  body.bk-ivory .bk-ctrl-btn { background:rgba(0,0,0,.05) !important; border-color:rgba(0,0,0,.1) !important; color:rgba(74,55,40,.6) !important; }
+  body.bk-ivory .bk-page-content { color:rgba(40,32,22,.88) !important; }
+  body.bk-ivory .bk-drop-cap::first-letter { color:#8a6020 !important; }
+  body.bk-ivory .bk-nav-btn { background:rgba(0,0,0,.04) !important; border-color:rgba(0,0,0,.1) !important; color:rgba(74,55,40,.6) !important; }
+  body.bk-ivory .bk-bubble { background:rgba(0,0,0,.1) !important; }
+  body.bk-ivory .bk-stats-strip, body.bk-ivory .bk-nav { border-color:rgba(0,0,0,.08) !important; }
+  body.bk-ivory .bk-page-num-watermark { color:rgba(0,0,0,.07) !important; }
+  @media (max-width:640px) {
+    .bk-topbar { padding:.55rem .9rem; gap:.5rem; }
+    .bk-progress-wrap { max-width:100px; }
+    .bk-reader { padding:0 1rem; }
+    .bk-hero-inner { flex-direction:column; gap:1rem; }
+    .bk-cover { display:none; }
+    .bk-page-bubbles { max-width:160px; }
+  }
+</style>
+
+<div id="bkRawContent" style="display:none">
+  {% if show_full %}{{ books.book_content }}{% else %}{{ preview_content }}{% endif %}
+</div>
+<div id="bkTotalWords" style="display:none"></div>
+
+<div class="bk-shell" id="bkShell">
+
+  <div class="bk-topbar">
+    <div class="bk-topbar-title" id="bkTopTitle">{{ books.book_title }}</div>
+    <div class="bk-progress-wrap" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bkProgressBar">
+      <div class="bk-progress-fill" id="bkProgressFill" style="width:0%"></div>
+    </div>
+    <span class="bk-pct-lbl" id="bkPctLbl">0%</span>
+    <div class="bk-page-indicator">
+      Pg <span class="bk-page-current" id="bkCurPg">1</span>
+      <span style="color:rgba(238,240,245,.2)">/</span>
+      <span id="bkTotPg">—</span>
+    </div>
+    <div class="bk-ctrl-group" aria-label="Font size">
+      <button class="bk-ctrl-btn" id="bkFontDec" aria-label="Smaller text">A−</button>
+      <span class="bk-ctrl-lbl" id="bkFontLbl">17</span>
+      <button class="bk-ctrl-btn" id="bkFontInc" aria-label="Larger text">A+</button>
+    </div>
+    <div class="bk-themes" role="group" aria-label="Reading theme">
+      <button class="bk-theme-dot td active" data-theme="dark"  title="Dark"  aria-pressed="true"></button>
+      <button class="bk-theme-dot ts"        data-theme="sepia" title="Sepia" aria-pressed="false"></button>
+      <button class="bk-theme-dot ti"        data-theme="ivory" title="Ivory" aria-pressed="false"></button>
+    </div>
+  </div>
+
+  <div class="bk-hero visible" id="bkHero">
+    <div class="bk-hero-inner">
+      <div class="bk-cover" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+      </div>
+      <div class="bk-hero-body">
+        <div class="bk-hero-id">
+          <div class="bk-hero-id-dot" aria-hidden="true"></div>
+          Book #{{ books.book_id }}
+        </div>
+        <h1 class="bk-hero-title">{{ books.book_title }}</h1>
+        <div class="bk-hero-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Published: {{ books.book_published_at }}
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Updated: {{ books.book_updated_at }}
+          </span>
+        </div>
+        <div class="bk-price-row">
+          <span class="bk-price">₹{{ books.book_price }}</span>
+          <span class="bk-price-strike">₹1,000</span>
+          <span class="bk-save">SAVE</span>
+        </div>
+
+        <!-- ── ACTION BUTTONS — role-based ── -->
+        <div class="bk-hero-actions">
+
+          {% if is_author %}
+            <!-- Author: full access + manage buttons -->
+            <span class="bk-btn-rented">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Your Book
+            </span>
+            <a href="{% url 'update_books' books.id %}" class="bk-action-btn bk-btn-edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Update
+            </a>
+            <a href="{% url 'delete_books' books.id %}" class="bk-action-btn bk-btn-del"
+               onclick="return confirm('Delete this book? This cannot be undone.')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              Delete
+            </a>
+
+          {% elif has_rented %}
+            <!-- Student with rent: full access badge -->
+            <span class="bk-btn-rented">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Already Rented · Full Access
+            </span>
+
+          {% else %}
+            <!-- Student without rent: show rent button -->
+            <a href="{% url 'rented_books' books.id %}" class="bk-action-btn bk-btn-rent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(8,9,13,.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Rent Book
+            </a>
+          {% endif %}
+
+        </div>
+
+        <!-- Preview banner — only for non-rented students -->
+        {% if not show_full and not is_author %}
+        <div class="bk-preview-banner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>You're reading a <strong style="color:#e8c97a">preview (100 words)</strong>. Rent to unlock full content.</span>
+          <a href="{% url 'rented_books' books.id %}" class="bk-preview-rent-btn">Rent Now →</a>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  <div class="bk-reader">
+    <div class="bk-stats-strip" id="bkStatsStrip">
+      <div class="bk-stat-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="bkReadTime">— min read</span>
+      </div>
+      <div class="bk-stat-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <strong id="bkWordCount">—</strong>&nbsp;words total
+      </div>
+      <div class="bk-stat-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <strong id="bkReadPct">0%</strong>&nbsp;read
+      </div>
+      <div class="bk-stat-chip" style="margin-left:auto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Words this page: <strong id="bkPageWords">—</strong>
+      </div>
+    </div>
+
+    <div class="bk-page-area" id="bkPageArea">
+      <div class="bk-page-content" id="bkPageContent" aria-live="polite" aria-label="Book page content"></div>
+      <div class="bk-page-num-watermark" id="bkWatermark"></div>
+    </div>
+
+    <div class="bk-end-card" id="bkEndCard" style="display:none" aria-label="Book finished">
+      <div class="bk-end-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(8,9,13,.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="bk-end-title">📖 You've finished the book!</div>
+      <div class="bk-end-sub">Great read! Rent it to keep access or browse more titles in the catalogue.</div>
+      <div class="bk-end-stats">
+        <div style="text-align:center"><div class="bk-end-stat-num" id="bkEndWords">—</div><div class="bk-end-stat-lbl">Words Read</div></div>
+        <div style="text-align:center"><div class="bk-end-stat-num" id="bkEndPages">—</div><div class="bk-end-stat-lbl">Pages</div></div>
+        <div style="text-align:center"><div class="bk-end-stat-num" id="bkEndTime">—</div><div class="bk-end-stat-lbl">Min Read</div></div>
+      </div>
+      {% if not has_rented and not is_author %}
+      <a href="{% url 'rented_books' books.id %}" class="bk-action-btn bk-btn-rent" style="margin-top:.25rem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(8,9,13,.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Rent This Book
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="bk-nav" id="bkNav">
+      <button class="bk-nav-btn" id="bkPrev" disabled aria-label="Previous page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Previous
+      </button>
+      <div class="bk-page-bubbles" id="bkBubbles" role="list" aria-label="Page navigation"></div>
+      <button class="bk-nav-btn next-btn" id="bkNext" aria-label="Next page">
+        Next
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div style="position:fixed;bottom:1.2rem;right:1.2rem;z-index:50;font-size:.65rem;color:rgba(238,240,245,.2);text-align:right;pointer-events:none;">
+  ← → arrow keys to flip pages
+</div>
+
+<script>
+(function(){
+  var rawEl   = document.getElementById('bkRawContent');
+  var rawText = rawEl ? rawEl.innerText || rawEl.textContent : '';
+  var paragraphs = rawText.split(/\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
+  if (!paragraphs.length) paragraphs = ['No content available for this book.'];
+  var WORDS_PER_PAGE = 280;
+  var pages = [], currentPage = [], currentWords = 0;
+  paragraphs.forEach(function(para){
+    var wc = para.split(/\s+/).filter(Boolean).length;
+    if (currentWords + wc > WORDS_PER_PAGE && currentPage.length > 0) {
+      pages.push(currentPage); currentPage = [para]; currentWords = wc;
+    } else { currentPage.push(para); currentWords += wc; }
+  });
+  if (currentPage.length) pages.push(currentPage);
+  if (!pages.length) pages = [['No content.']];
+  var totalPages = pages.length, currentPageIdx = 0, fontSize = 17, direction = 'forward';
+  var totalWords = rawText.trim().split(/\s+/).filter(Boolean).length;
+  var totalMins  = Math.max(1, Math.ceil(totalWords / 200));
+  var contentEl  = document.getElementById('bkPageContent');
+  var prevBtn    = document.getElementById('bkPrev');
+  var nextBtn    = document.getElementById('bkNext');
+  var curPgEl    = document.getElementById('bkCurPg');
+  var totPgEl    = document.getElementById('bkTotPg');
+  var fillEl     = document.getElementById('bkProgressFill');
+  var pctEl      = document.getElementById('bkPctLbl');
+  var pctEl2     = document.getElementById('bkReadPct');
+  var bubblesEl  = document.getElementById('bkBubbles');
+  var hero       = document.getElementById('bkHero');
+  var endCard    = document.getElementById('bkEndCard');
+  var watermark  = document.getElementById('bkWatermark');
+  var fontLbl    = document.getElementById('bkFontLbl');
+  var readTimeEl = document.getElementById('bkReadTime');
+  var wordCountEl= document.getElementById('bkWordCount');
+  var pgWordsEl  = document.getElementById('bkPageWords');
+  var progressBar= document.getElementById('bkProgressBar');
+  totPgEl.textContent        = totalPages;
+  readTimeEl.textContent     = totalMins + ' min read';
+  wordCountEl.textContent    = totalWords.toLocaleString();
+  document.getElementById('bkEndWords').textContent = totalWords.toLocaleString();
+  document.getElementById('bkEndPages').textContent = totalPages;
+  document.getElementById('bkEndTime').textContent  = totalMins;
+  function buildBubbles(){
+    bubblesEl.innerHTML = '';
+    var step = totalPages <= 15 ? 1 : Math.ceil(totalPages / 15);
+    for (var i = 0; i < totalPages; i += step){
+      (function(idx){
+        var b = document.createElement('button');
+        b.className = 'bk-bubble';
+        b.setAttribute('role','listitem');
+        b.setAttribute('aria-label','Page ' + (idx+1));
+        b.setAttribute('title','Page ' + (idx+1));
+        b.addEventListener('click', function(){
+          direction = idx > currentPageIdx ? 'forward' : 'back';
+          currentPageIdx = idx; renderPage();
+        });
+        bubblesEl.appendChild(b);
+      })(i);
+    }
+  }
+  buildBubbles();
+  function renderPage(){
+    var pg = pages[currentPageIdx];
+    var isFirst = currentPageIdx === 0;
+    var isLast  = currentPageIdx === totalPages - 1;
+    var pct = totalPages <= 1 ? 100 : Math.round(((currentPageIdx + 1) / totalPages) * 100);
+    var pgWords = pg.join(' ').trim().split(/\s+/).filter(Boolean).length;
+    pgWordsEl.textContent = pgWords;
+    if (isFirst) hero.classList.add('visible'); else hero.classList.remove('visible');
+    endCard.style.display = isLast ? 'flex' : 'none';
+    fillEl.style.width = pct + '%'; pctEl.textContent = pct + '%'; pctEl2.textContent = pct + '%';
+    progressBar.setAttribute('aria-valuenow', pct);
+    curPgEl.textContent = currentPageIdx + 1;
+    watermark.textContent = 'Page ' + (currentPageIdx + 1) + ' / ' + totalPages;
+    prevBtn.disabled = currentPageIdx === 0;
+    nextBtn.disabled = isLast;
+    nextBtn.innerHTML = 'Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    var step = totalPages <= 15 ? 1 : Math.ceil(totalPages / 15);
+    bubblesEl.querySelectorAll('.bk-bubble').forEach(function(b, i){
+      var pb = i * step; b.classList.remove('current','read');
+      if (pb === currentPageIdx) b.classList.add('current');
+      else if (pb < currentPageIdx) b.classList.add('read');
+    });
+    var html = pg.map(function(para, i){
+      var cls = (isFirst && i === 0) ? 'bk-drop-cap' : '';
+      return '<p class="' + cls + '">' + para.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>';
+    }).join('');
+    contentEl.classList.add('flip-out');
+    setTimeout(function(){
+      contentEl.innerHTML = html;
+      contentEl.classList.remove('flip-out');
+      contentEl.classList.add(direction === 'back' ? 'flip-in-back' : 'flip-in');
+      contentEl.style.fontSize = fontSize + 'px';
+      setTimeout(function(){ contentEl.classList.remove('flip-in','flip-in-back'); }, 350);
+      window.scrollTo({ top: document.getElementById('bkStatsStrip').offsetTop - 80, behavior:'smooth' });
+    }, 180);
+    try { localStorage.setItem('bv_pg_{{ books.id }}', currentPageIdx); } catch(e){}
+  }
+  try {
+    var saved = parseInt(localStorage.getItem('bv_pg_{{ books.id }}'), 10);
+    if (!isNaN(saved) && saved > 0 && saved < totalPages) currentPageIdx = saved;
+  } catch(e){}
+  renderPage();
+  nextBtn.addEventListener('click', function(){
+    if (currentPageIdx < totalPages - 1){ direction = 'forward'; currentPageIdx++; renderPage(); }
+  });
+  prevBtn.addEventListener('click', function(){
+    if (currentPageIdx > 0){ direction = 'back'; currentPageIdx--; renderPage(); }
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' && currentPageIdx < totalPages - 1){ direction='forward'; currentPageIdx++; renderPage(); }
+    if (e.key === 'ArrowLeft'  && currentPageIdx > 0)             { direction='back';    currentPageIdx--; renderPage(); }
+  });
+  var touchStartX = 0;
+  document.addEventListener('touchstart', function(e){ touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(dx) > 60){
+      if (dx < 0 && currentPageIdx < totalPages - 1){ direction='forward'; currentPageIdx++; renderPage(); }
+      if (dx > 0 && currentPageIdx > 0)             { direction='back';    currentPageIdx--; renderPage(); }
+    }
+  }, {passive:true});
+  function setFont(n){
+    fontSize = Math.min(26, Math.max(13, n));
+    contentEl.style.fontSize = fontSize + 'px'; fontLbl.textContent = fontSize;
+  }
+  document.getElementById('bkFontInc').addEventListener('click', function(){ setFont(fontSize+1); });
+  document.getElementById('bkFontDec').addEventListener('click', function(){ setFont(fontSize-1); });
+  document.querySelectorAll('.bk-theme-dot').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.bk-theme-dot').forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+      btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+      var t = btn.getAttribute('data-theme');
+      document.body.classList.remove('bk-sepia','bk-ivory');
+      if (t === 'sepia') document.body.classList.add('bk-sepia');
+      if (t === 'ivory') document.body.classList.add('bk-ivory');
+    });
+  });
+})();
+</script>
+
+{% endblock content %}

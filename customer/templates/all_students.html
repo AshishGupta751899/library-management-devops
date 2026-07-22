@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#0b0c10 !important; color:#eef0f5 !important; }
+
+  .st-page {
+    min-height: calc(100vh - 64px);
+    background: #0b0c10;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 3rem 1.5rem;
+    position: relative;
+  }
+  .st-page::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 55% 40% at 5%  10%, rgba(45,212,191,.07)  0%,transparent 55%),
+      radial-gradient(ellipse 45% 50% at 95% 90%, rgba(201,168,76,.05)  0%,transparent 55%);
+  }
+
+  .st-inner {
+    position:relative; z-index:1;
+    max-width:1100px; margin:0 auto;
+  }
+
+  /* ── Page header ── */
+  .st-header {
+    display:flex; align-items:flex-end;
+    justify-content:space-between;
+    gap:1.5rem; margin-bottom:2rem;
+    flex-wrap:wrap;
+  }
+  .st-eyebrow {
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-size:.7rem; font-weight:600;
+    color:#2dd4bf; letter-spacing:.12em;
+    text-transform:uppercase; margin-bottom:.6rem;
+  }
+  .st-eyebrow-dot {
+    width:5px; height:5px; border-radius:50%;
+    background:#2dd4bf; box-shadow:0 0 6px rgba(45,212,191,.7);
+    animation:stPulse 2s ease-in-out infinite;
+  }
+  @keyframes stPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .st-title {
+    font-size:clamp(1.6rem,3.5vw,2.2rem);
+    font-weight:800; letter-spacing:-.03em;
+    color:#eef0f5; line-height:1.15;
+  }
+  .st-title span {
+    background:linear-gradient(120deg,#5eead4,#2dd4bf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .st-subtitle {
+    margin-top:.5rem; font-size:.88rem;
+    color:rgba(238,240,245,.42); line-height:1.6;
+  }
+
+  .st-count {
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.35rem .9rem;
+    background:rgba(45,212,191,.08);
+    border:1px solid rgba(45,212,191,.2);
+    border-radius:999px;
+    font-size:.75rem; font-weight:600; color:#2dd4bf;
+    white-space:nowrap; align-self:flex-start; margin-top:.4rem;
+  }
+
+  /* ── Toolbar ── */
+  .st-toolbar {
+    display:flex; align-items:center; gap:.75rem;
+    margin-bottom:1.75rem; flex-wrap:wrap;
+  }
+  .st-search-wrap {
+    position:relative; flex:1; min-width:200px; max-width:360px;
+  }
+  .st-search-icon {
+    position:absolute; left:.85rem; top:50%; transform:translateY(-50%);
+    color:rgba(238,240,245,.28); pointer-events:none; display:flex;
+  }
+  .st-search-icon svg { width:14px; height:14px; }
+  .st-search {
+    width:100%;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:10px; color:#eef0f5;
+    padding:.6rem .9rem .6rem 2.4rem;
+    font-size:.83rem;
+    font-family:'DM Sans',system-ui,sans-serif;
+    outline:none; transition:border .2s, box-shadow .2s;
+    caret-color:#2dd4bf;
+  }
+  .st-search::placeholder { color:rgba(238,240,245,.2); }
+  .st-search:focus {
+    border-color:rgba(45,212,191,.4);
+    box-shadow:0 0 0 3px rgba(45,212,191,.08);
+  }
+  .st-result-lbl {
+    font-size:.75rem; color:rgba(238,240,245,.38);
+    white-space:nowrap;
+  }
+
+  /* View toggle */
+  .st-view-toggle {
+    display:flex; gap:.3rem; margin-left:auto;
+  }
+  .st-view-btn {
+    width:32px; height:32px; border-radius:7px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:rgba(238,240,245,.35);
+    transition:all .18s;
+  }
+  .st-view-btn.active {
+    background:rgba(45,212,191,.1);
+    border-color:rgba(45,212,191,.25);
+    color:#2dd4bf;
+  }
+  .st-view-btn svg { width:14px; height:14px; }
+
+  /* ── CARD VIEW ── */
+  .st-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:1rem;
+  }
+  .st-grid.hidden { display:none; }
+
+  .st-card {
+    background:linear-gradient(160deg,rgba(255,255,255,.036) 0%,rgba(255,255,255,.014) 100%);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:16px; padding:1.4rem;
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; gap:.65rem;
+    position:relative; overflow:hidden;
+    transition:border .22s, transform .22s, box-shadow .22s;
+    animation:stCardIn .4s ease both;
+  }
+  @keyframes stCardIn {
+    from{opacity:0;transform:translateY(8px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .st-card:hover {
+    border-color:rgba(45,212,191,.25);
+    transform:translateY(-3px);
+    box-shadow:0 10px 36px rgba(0,0,0,.35);
+  }
+  .st-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(45,212,191,.4),transparent);
+    opacity:0; transition:opacity .22s;
+  }
+  .st-card:hover::before { opacity:1; }
+
+  /* Avatar in card */
+  .st-card-av {
+    width:56px; height:56px; border-radius:50%;
+    background:linear-gradient(135deg,#0f766e,#2dd4bf);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.15rem; font-weight:700; color:#0b0c10;
+    flex-shrink:0;
+    box-shadow:0 0 0 3px rgba(45,212,191,.15);
+  }
+  .st-card-name {
+    font-size:.9rem; font-weight:700;
+    color:#eef0f5; letter-spacing:-.01em;
+    line-height:1.2;
+  }
+  .st-card-user {
+    font-size:.72rem; color:rgba(238,240,245,.38);
+    font-family:monospace; letter-spacing:.02em;
+  }
+  .st-card-badge {
+    display:inline-flex; align-items:center; gap:.3rem;
+    padding:.22rem .65rem;
+    background:rgba(45,212,191,.08);
+    border:1px solid rgba(45,212,191,.18);
+    border-radius:999px;
+    font-size:.65rem; font-weight:600; color:#2dd4bf;
+    text-transform:uppercase; letter-spacing:.07em;
+  }
+  .st-card-badge-dot {
+    width:4px; height:4px; border-radius:50%;
+    background:#2dd4bf;
+  }
+  .st-card-joined {
+    font-size:.7rem; color:rgba(238,240,245,.3);
+    margin-top:.1rem;
+  }
+
+  /* ── TABLE VIEW ── */
+  .st-table-wrap {
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:16px; overflow:hidden;
+  }
+  .st-table-wrap.hidden { display:none; }
+  .st-table {
+    width:100%; border-collapse:collapse;
+  }
+  .st-table thead {
+    background:rgba(255,255,255,.03);
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .st-table th {
+    padding:.75rem 1rem;
+    font-size:.68rem; font-weight:600;
+    color:rgba(238,240,245,.38);
+    text-transform:uppercase; letter-spacing:.09em;
+    text-align:left; white-space:nowrap;
+  }
+  .st-table tbody tr {
+    border-bottom:1px solid rgba(255,255,255,.05);
+    transition:background .15s;
+    animation:stCardIn .35s ease both;
+  }
+  .st-table tbody tr:last-child { border-bottom:none; }
+  .st-table tbody tr:hover { background:rgba(255,255,255,.025); }
+  .st-table td {
+    padding:.85rem 1rem;
+    font-size:.82rem; color:rgba(238,240,245,.7);
+    vertical-align:middle;
+  }
+
+  /* Table avatar */
+  .st-tav {
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg,#0f766e,#2dd4bf);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:.72rem; font-weight:700; color:#0b0c10;
+    flex-shrink:0;
+  }
+  .st-tname-wrap { display:flex; align-items:center; gap:.75rem; }
+  .st-tname { font-weight:600; color:#eef0f5; font-size:.83rem; }
+  .st-tusername { font-size:.72rem; color:rgba(238,240,245,.35); font-family:monospace; }
+
+  .st-tbadge {
+    display:inline-flex; align-items:center; gap:.28rem;
+    padding:.2rem .6rem;
+    background:rgba(45,212,191,.08);
+    border:1px solid rgba(45,212,191,.18);
+    border-radius:999px;
+    font-size:.65rem; font-weight:600; color:#2dd4bf;
+  }
+  .st-tbadge-dot { width:4px; height:4px; border-radius:50%; background:#2dd4bf; }
+
+  /* ── Empty state ── */
+  .st-empty {
+    display:flex; flex-direction:column; align-items:center;
+    gap:1rem; padding:4rem 2rem; text-align:center;
+    grid-column:1/-1;
+  }
+  .st-empty-icon {
+    width:60px; height:60px; border-radius:16px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .st-empty-icon svg { width:26px; height:26px; color:rgba(238,240,245,.2); }
+  .st-empty-title { font-size:1rem; font-weight:700; color:rgba(238,240,245,.4); }
+  .st-empty-sub   { font-size:.82rem; color:rgba(238,240,245,.25); }
+
+  /* Responsive */
+  @media (max-width:640px) {
+    .st-page { padding:2rem 1rem; }
+    .st-grid { grid-template-columns:1fr 1fr; }
+    .st-view-toggle { display:none; }
+    .st-table th:nth-child(3),
+    .st-table td:nth-child(3) { display:none; }
+  }
+  @media (max-width:420px) {
+    .st-grid { grid-template-columns:1fr; }
+  }
+</style>
+
+<div class="st-page">
+  <div class="st-inner">
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="st-header">
+      <div>
+        <div class="st-eyebrow">
+          <div class="st-eyebrow-dot" aria-hidden="true"></div>
+          Member Directory
+        </div>
+        <h1 class="st-title">All <span>Students</span></h1>
+        <p class="st-subtitle">Every registered student on the BookVault platform.</p>
+      </div>
+      <div class="st-count" aria-label="Total students">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        {{ students|length }} Student{{ students|length|pluralize }} Registered
+      </div>
+    </div>
+
+    <!-- ═══ TOOLBAR ═══ -->
+    <div class="st-toolbar">
+      <div class="st-search-wrap">
+        <span class="st-search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </span>
+        <input class="st-search" type="search" id="stSearch"
+               placeholder="Search by name or username…"
+               aria-label="Search students" autocomplete="off"/>
+      </div>
+      <span class="st-result-lbl" id="stResultLbl" aria-live="polite"></span>
+
+      <!-- Grid / Table toggle -->
+      <div class="st-view-toggle" role="group" aria-label="View mode">
+        <button class="st-view-btn active" id="stBtnGrid" title="Card view" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <button class="st-view-btn" id="stBtnTable" title="Table view" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6"  x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ CARD GRID ═══ -->
+    <div class="st-grid" id="stGrid" role="list" aria-label="Student cards">
+      {% for student in students %}
+      <div class="st-card" role="listitem"
+           data-name="{{ student.get_full_name|lower }} {{ student.username|lower }}"
+           style="animation-delay:{{ forloop.counter0 }}00ms">
+
+        <!-- Avatar with initials -->
+        <div class="st-card-av" aria-hidden="true">
+          {% if student.first_name %}
+            {{ student.first_name|first|upper }}{{ student.last_name|first|upper }}
+          {% else %}
+            {{ student.username|first|upper }}
+          {% endif %}
+        </div>
+
+        <!-- Name -->
+        <div>
+          <div class="st-card-name">
+            {% if student.first_name %}
+              {{ student.first_name }} {{ student.last_name }}
+            {% else %}
+              {{ student.username }}
+            {% endif %}
+          </div>
+          <div class="st-card-user">@{{ student.username }}</div>
+        </div>
+
+        <!-- Active badge -->
+        <div class="st-card-badge">
+          <div class="st-card-badge-dot" aria-hidden="true"></div>
+          Active Student
+        </div>
+
+        <!-- Join date -->
+        <div class="st-card-joined">
+          Joined {{ student.date_joined|date:"M d, Y" }}
+        </div>
+
+      </div>
+      {% empty %}
+      <div class="st-empty" role="status">
+        <div class="st-empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="st-empty-title">No students registered yet</div>
+        <div class="st-empty-sub">Students will appear here once they sign up.</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ═══ TABLE VIEW ═══ -->
+    <div class="st-table-wrap hidden" id="stTableWrap">
+      <table class="st-table" role="table" aria-label="Students table">
+        <thead>
+          <tr>
+            <th scope="col">Student</th>
+            <th scope="col">Username</th>
+            <th scope="col">Email</th>
+            <th scope="col">Joined</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody id="stTbody">
+          {% for student in students %}
+          <tr data-name="{{ student.get_full_name|lower }} {{ student.username|lower }}">
+            <td>
+              <div class="st-tname-wrap">
+                <div class="st-tav" aria-hidden="true">
+                  {% if student.first_name %}
+                    {{ student.first_name|first|upper }}{{ student.last_name|first|upper }}
+                  {% else %}
+                    {{ student.username|first|upper }}
+                  {% endif %}
+                </div>
+                <div>
+                  <div class="st-tname">
+                    {% if student.first_name %}
+                      {{ student.first_name }} {{ student.last_name }}
+                    {% else %}
+                      {{ student.username }}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:monospace;font-size:.78rem;color:rgba(238,240,245,.45);">
+              @{{ student.username }}
+            </td>
+            <td style="color:rgba(238,240,245,.5);">
+              {{ student.email|default:"—" }}
+            </td>
+            <td style="color:rgba(238,240,245,.4);font-size:.78rem;">
+              {{ student.date_joined|date:"M d, Y" }}
+            </td>
+            <td>
+              <div class="st-tbadge">
+                <div class="st-tbadge-dot" aria-hidden="true"></div>
+                Active
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="text-align:center;padding:2.5rem;color:rgba(238,240,245,.28);font-size:.85rem;">
+              No students registered yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /.st-inner -->
+</div>
+
+<script>
+  /* ── View toggle: Grid ↔ Table ── */
+  (function(){
+    var btnGrid  = document.getElementById('stBtnGrid');
+    var btnTable = document.getElementById('stBtnTable');
+    var grid     = document.getElementById('stGrid');
+    var table    = document.getElementById('stTableWrap');
+    if (!btnGrid || !btnTable) return;
+
+    btnGrid.addEventListener('click', function(){
+      grid.classList.remove('hidden');
+      table.classList.add('hidden');
+      btnGrid.classList.add('active');
+      btnTable.classList.remove('active');
+      btnGrid.setAttribute('aria-pressed','true');
+      btnTable.setAttribute('aria-pressed','false');
+    });
+    btnTable.addEventListener('click', function(){
+      table.classList.remove('hidden');
+      grid.classList.add('hidden');
+      btnTable.classList.add('active');
+      btnGrid.classList.remove('active');
+      btnTable.setAttribute('aria-pressed','true');
+      btnGrid.setAttribute('aria-pressed','false');
+    });
+  })();
+
+  /* ── Live search ── */
+  (function(){
+    var input = document.getElementById('stSearch');
+    var lbl   = document.getElementById('stResultLbl');
+    if (!input) return;
+
+    input.addEventListener('input', function(){
+      var q     = this.value.trim().toLowerCase();
+      var cards = document.querySelectorAll('#stGrid .st-card');
+      var rows  = document.querySelectorAll('#stTbody tr[data-name]');
+      var shown = 0;
+
+      cards.forEach(function(el){
+        var match = !q || (el.getAttribute('data-name')||'').includes(q);
+        el.style.display = match ? '' : 'none';
+        if (match) shown++;
+      });
+      rows.forEach(function(el){
+        var match = !q || (el.getAttribute('data-name')||'').includes(q);
+        el.style.display = match ? '' : 'none';
+      });
+
+      lbl.textContent = q
+        ? shown + ' result' + (shown !== 1 ? 's' : '') + ' for "' + input.value.trim() + '"'
+        : '';
+    });
+  })();
+
+  /* ── Stagger animation delay cap at 500ms ── */
+  (function(){
+    document.querySelectorAll('.st-card').forEach(function(card, i){
+      card.style.animationDelay = Math.min(i * 60, 500) + 'ms';
+    });
+  })();
+</script>
+
+{% endblock content %}

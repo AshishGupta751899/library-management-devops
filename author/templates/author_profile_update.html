@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#0b0c10 !important; color:#eef0f5 !important; }
+
+  .au-page {
+    min-height: calc(100vh - 64px);
+    background: #0b0c10;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem 1.5rem;
+    position: relative;
+  }
+  .au-page::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 55% 45% at 8%  15%, rgba(45,212,191,.07) 0%,transparent 55%),
+      radial-gradient(ellipse 45% 55% at 92% 85%, rgba(201,168,76,.05) 0%,transparent 55%);
+  }
+
+  .au-wrap {
+    position:relative; z-index:1;
+    width:100%; max-width:600px;
+    animation:auIn .6s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes auIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Header ── */
+  .au-header { margin-bottom:1.5rem; }
+  .au-eyebrow {
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-size:.68rem; font-weight:600; color:#2dd4bf;
+    letter-spacing:.12em; text-transform:uppercase; margin-bottom:.55rem;
+  }
+  .au-eyebrow-dot {
+    width:5px; height:5px; border-radius:50%;
+    background:#2dd4bf; box-shadow:0 0 6px rgba(45,212,191,.7);
+    animation:auPulse 2s ease-in-out infinite;
+  }
+  @keyframes auPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .au-title {
+    font-size:1.55rem; font-weight:800;
+    letter-spacing:-.03em; color:#eef0f5;
+  }
+  .au-title span {
+    background:linear-gradient(120deg,#5eead4,#2dd4bf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .au-subtitle { margin-top:.35rem; font-size:.82rem; color:rgba(238,240,245,.4); }
+
+  /* ── Card ── */
+  .au-card {
+    background:linear-gradient(160deg,rgba(255,255,255,.036) 0%,rgba(255,255,255,.014) 100%);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:22px; padding:2rem;
+    position:relative; overflow:hidden;
+  }
+  .au-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(45,212,191,.5),rgba(94,234,212,.3),transparent);
+  }
+
+  /* ── Avatar upload ── */
+  .au-avatar-section {
+    display:flex; align-items:center; gap:1.25rem;
+    padding:1.1rem;
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px; margin-bottom:1.5rem;
+  }
+  .au-avatar-preview {
+    width:68px; height:68px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#0f766e,#2dd4bf);
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid rgba(45,212,191,.35);
+    box-shadow:0 0 0 3px rgba(45,212,191,.1);
+    overflow:hidden;
+  }
+  .au-avatar-preview svg { width:28px; height:28px; color:rgba(11,12,16,.7); }
+  .au-avatar-preview img { width:100%; height:100%; object-fit:cover; display:none; }
+  .au-avatar-info { flex:1; }
+  .au-avatar-label { font-size:.82rem; font-weight:600; color:#eef0f5; margin-bottom:.25rem; }
+  .au-avatar-hint  { font-size:.72rem; color:rgba(238,240,245,.38); line-height:1.5; }
+  .au-file-btn {
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.4rem .85rem; border-radius:8px;
+    background:rgba(45,212,191,.1);
+    border:1px solid rgba(45,212,191,.22);
+    color:#2dd4bf; font-size:.75rem; font-weight:600;
+    cursor:pointer; transition:all .18s; margin-top:.5rem; width:fit-content;
+  }
+  .au-file-btn:hover { background:rgba(45,212,191,.18); }
+  .au-file-btn svg { width:12px; height:12px; }
+
+  /* ── Grid rows ── */
+  .au-row { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+
+  /* ── Fields ── */
+  .au-field { margin-bottom:.95rem; }
+  .au-field label {
+    display:block; margin-bottom:.4rem;
+    font-size:.68rem; font-weight:600;
+    color:rgba(238,240,245,.6);
+    text-transform:uppercase; letter-spacing:.08em;
+  }
+  .au-input-wrap { position:relative; }
+  .au-input-icon {
+    position:absolute; left:.88rem; top:50%; transform:translateY(-50%);
+    color:rgba(238,240,245,.25); pointer-events:none;
+    display:flex; transition:color .2s;
+  }
+  .au-input-wrap:focus-within .au-input-icon { color:#2dd4bf; }
+  .au-input-wrap.textarea-wrap .au-input-icon { top:.75rem; transform:none; }
+
+  /* Django widget override */
+  .au-field input[type=text],
+  .au-field input[type=email],
+  .au-field input[type=tel],
+  .au-field input[type=number],
+  .au-field select,
+  .au-field textarea {
+    width:100% !important;
+    background:rgba(255,255,255,.03) !important;
+    border:1px solid rgba(255,255,255,.07) !important;
+    border-radius:11px !important;
+    color:#eef0f5 !important;
+    padding:.68rem .9rem .68rem 2.5rem !important;
+    font-size:.86rem !important;
+    font-family:'DM Sans',system-ui,sans-serif !important;
+    outline:none !important;
+    transition:border .22s, box-shadow .22s, background .22s !important;
+    caret-color:#2dd4bf !important;
+    box-sizing:border-box !important;
+  }
+  .au-field textarea {
+    padding:.7rem .9rem .7rem 2.5rem !important;
+    min-height:110px !important;
+    line-height:1.65 !important;
+    resize:vertical !important;
+  }
+  /* Select — multiple */
+  .au-field select[multiple] {
+    padding:.5rem .9rem !important;
+    min-height:110px !important;
+  }
+  .au-field input::placeholder,
+  .au-field textarea::placeholder { color:rgba(238,240,245,.18) !important; }
+  .au-field input:hover,
+  .au-field select:hover,
+  .au-field textarea:hover { border-color:rgba(255,255,255,.12) !important; background:rgba(255,255,255,.04) !important; }
+  .au-field input:focus,
+  .au-field select:focus,
+  .au-field textarea:focus {
+    border-color:rgba(45,212,191,.45) !important;
+    background:rgba(45,212,191,.03) !important;
+    box-shadow:0 0 0 3px rgba(45,212,191,.1) !important;
+  }
+
+  /* Select option dark */
+  .au-field select option { background:#0b0c10 !important; color:#eef0f5 !important; }
+
+  /* Char counter */
+  .au-char-count { font-size:.68rem; color:rgba(238,240,245,.28); text-align:right; margin-top:.28rem; }
+
+  /* Books field hint */
+  .au-field-hint {
+    font-size:.7rem; color:rgba(45,212,191,.55);
+    margin-top:.3rem; display:flex; align-items:center; gap:.3rem;
+  }
+  .au-field-hint svg { width:11px; height:11px; flex-shrink:0; }
+
+  /* Errors */
+  .au-field ul.errorlist { list-style:none !important; margin:.28rem 0 0 !important; padding:0 !important; }
+  .au-field ul.errorlist li {
+    font-size:.7rem !important; color:#f87171 !important;
+    padding:.22rem .6rem !important;
+    background:rgba(248,113,113,.08) !important;
+    border:1px solid rgba(248,113,113,.22) !important;
+    border-radius:6px !important; margin-top:.2rem !important;
+  }
+  .au-field ul.errorlist li::before { content:'⚠ '; }
+
+  /* Dividers */
+  .au-divider {
+    display:flex; align-items:center; gap:.6rem; margin:1.1rem 0;
+  }
+  .au-divider-line { flex:1; height:1px; background:rgba(255,255,255,.06); }
+  .au-divider-text { font-size:.68rem; color:rgba(238,240,245,.25); white-space:nowrap; }
+
+  /* ── Actions ── */
+  .au-actions {
+    display:flex; gap:.65rem; align-items:center;
+    padding-top:1.25rem; margin-top:.5rem;
+    border-top:1px solid rgba(255,255,255,.06);
+  }
+  .au-btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:.45rem;
+    padding:.72rem 1.4rem; border-radius:11px;
+    font-size:.86rem; font-weight:700;
+    border:none; cursor:pointer;
+    font-family:'DM Sans',system-ui,sans-serif;
+    text-decoration:none; transition:all .2s;
+    position:relative; overflow:hidden;
+  }
+  .au-btn svg { width:13px; height:13px; flex-shrink:0; }
+  .au-btn-save {
+    background:linear-gradient(135deg,#0f766e,#2dd4bf);
+    color:#0b0c10; flex:1;
+    box-shadow:0 3px 14px rgba(45,212,191,.22);
+  }
+  .au-btn-save::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);
+    opacity:0; transition:opacity .2s;
+  }
+  .au-btn-save:hover { box-shadow:0 6px 22px rgba(45,212,191,.38); transform:translateY(-1px); }
+  .au-btn-save:hover::before { opacity:1; }
+  .au-btn-save:disabled { opacity:.65; cursor:not-allowed; }
+  .au-btn-cancel {
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08) !important;
+    color:rgba(238,240,245,.5); padding:.72rem 1.1rem;
+  }
+  .au-btn-cancel:hover { background:rgba(255,255,255,.08); color:#eef0f5; }
+
+  /* Ripple */
+  .au-ripple {
+    position:absolute; border-radius:50%;
+    background:rgba(11,12,16,.25);
+    transform:scale(0);
+    animation:auRip .5s ease-out forwards; pointer-events:none;
+  }
+  @keyframes auRip  { to { transform:scale(4); opacity:0; } }
+  @keyframes auSpin { to { transform:rotate(360deg); } }
+
+  @media (max-width:520px) {
+    .au-page { padding:2rem 1rem; align-items:flex-start; }
+    .au-card { padding:1.4rem 1.1rem; }
+    .au-row  { grid-template-columns:1fr; }
+    .au-actions { flex-direction:column; }
+    .au-btn-cancel { width:100%; }
+  }
+</style>
+
+<div class="au-page">
+  <div class="au-wrap">
+
+    <!-- Header -->
+    <div class="au-header">
+      <div class="au-eyebrow">
+        <div class="au-eyebrow-dot" aria-hidden="true"></div>
+        Author Dashboard
+      </div>
+      <h1 class="au-title">Update your <span>Profile</span></h1>
+      <p class="au-subtitle">Keep your author information and book catalogue up to date.</p>
+    </div>
+
+    <!-- Card -->
+    <div class="au-card">
+
+      <!-- ─── Django form — ALL fields preserved ─── -->
+      <form method="post" action="" novalidate enctype="multipart/form-data" id="auForm">
+        {% csrf_token %}
+
+        <!-- Avatar upload -->
+        <div class="au-avatar-section">
+          <div class="au-avatar-preview" id="auAvatarPreview">
+            <img id="auAvatarImg" alt="Profile preview"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                 id="auAvatarPlaceholder" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="au-avatar-info">
+            <div class="au-avatar-label">Author Photo</div>
+            <div class="au-avatar-hint">JPG, PNG · Max 5MB · 400×400px recommended</div>
+            <div style="display:none" id="auImgFieldWrap">
+              {{ form.author_img }}
+              {{ form.author_img.errors }}
+            </div>
+            <label class="au-file-btn" for="{{ form.author_img.id_for_label }}" role="button" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span id="auFileLabel">Choose Photo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Name + Mobile -->
+        <div class="au-row">
+          <div class="au-field">
+            {{ form.author_name.label_tag }}
+            <div class="au-input-wrap">
+              <span class="au-input-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              {{ form.author_name }}
+              {{ form.author_name.errors }}
+            </div>
+          </div>
+          <div class="au-field">
+            {{ form.author_mob.label_tag }}
+            <div class="au-input-wrap">
+              <span class="au-input-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </span>
+              {{ form.author_mob }}
+              {{ form.author_mob.errors }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="au-field">
+          {{ form.author_email.label_tag }}
+          <div class="au-input-wrap">
+            <span class="au-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </span>
+            {{ form.author_email }}
+            {{ form.author_email.errors }}
+          </div>
+        </div>
+
+        <!-- Education -->
+        <div class="au-field">
+          {{ form.author_education.label_tag }}
+          <div class="au-input-wrap">
+            <span class="au-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+              </svg>
+            </span>
+            {{ form.author_education }}
+            {{ form.author_education.errors }}
+          </div>
+        </div>
+
+        <div class="au-divider">
+          <div class="au-divider-line"></div>
+          <span class="au-divider-text">Books & Bio</span>
+          <div class="au-divider-line"></div>
+        </div>
+
+        <!-- Author Books -->
+        <div class="au-field">
+          {{ form.author_books.label_tag }}
+          <div class="au-input-wrap">
+            <span class="au-input-icon" style="top:.75rem;transform:none;" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </span>
+            {{ form.author_books }}
+            {{ form.author_books.errors }}
+          </div>
+          <div class="au-field-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Ctrl+Click to select multiple books
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="au-field">
+          {{ form.author_about.label_tag }}
+          <div class="au-input-wrap textarea-wrap">
+            <span class="au-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="17" y1="10" x2="3" y2="10"/>
+                <line x1="21" y1="6"  x2="3" y2="6"/>
+                <line x1="21" y1="14" x2="3" y2="14"/>
+                <line x1="17" y1="18" x2="3" y2="18"/>
+              </svg>
+            </span>
+            {{ form.author_about }}
+            {{ form.author_about.errors }}
+          </div>
+          <div class="au-char-count" id="auAboutCount">0 chars</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="au-actions">
+          <button type="submit" class="au-btn au-btn-save" id="auSubmit">
+            <div id="auBtnInner" style="display:flex;align-items:center;gap:.45rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(11,12,16,.85)"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save Profile
+            </div>
+          </button>
+          <a href="{% url 'author_profile' %}" class="au-btn au-btn-cancel" aria-label="Cancel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Cancel
+          </a>
+        </div>
+
+      </form>
+      <!-- ─────────────── -->
+
+    </div><!-- /.au-card -->
+  </div><!-- /.au-wrap -->
+</div>
+
+<script>
+  /* ── Avatar preview ── */
+  (function(){
+    var input       = document.querySelector('[name="author_img"]');
+    var img         = document.getElementById('auAvatarImg');
+    var placeholder = document.getElementById('auAvatarPlaceholder');
+    var fileLabel   = document.getElementById('auFileLabel');
+    if (!input) return;
+    input.style.cssText = 'position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;';
+    input.addEventListener('change', function(){
+      if (this.files && this.files[0]){
+        var reader = new FileReader();
+        reader.onload = function(e){
+          img.src = e.target.result;
+          img.style.display = 'block';
+          if (placeholder) placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(this.files[0]);
+        var name = this.files[0].name;
+        fileLabel.textContent = name.length > 20 ? name.substring(0,18)+'…' : name;
+      }
+    });
+  })();
+
+  /* ── About char counter ── */
+  (function(){
+    var ta  = document.querySelector('[name="author_about"]');
+    var lbl = document.getElementById('auAboutCount');
+    if (!ta || !lbl) return;
+    function update(){ lbl.textContent = ta.value.length + ' chars'; }
+    ta.addEventListener('input', update);
+    update();
+  })();
+
+  /* ── Ripple + loading ── */
+  (function(){
+    var btn  = document.getElementById('auSubmit');
+    var form = document.getElementById('auForm');
+    if (!btn || !form) return;
+    btn.addEventListener('click', function(e){
+      var r = document.createElement('span');
+      r.className = 'au-ripple';
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      r.style.cssText =
+        'width:'+size+'px;height:'+size+'px;' +
+        'left:'+(e.clientX-rect.left-size/2)+'px;' +
+        'top:'+(e.clientY-rect.top-size/2)+'px;';
+      btn.appendChild(r);
+      setTimeout(function(){ r.remove(); }, 520);
+    });
+    form.addEventListener('submit', function(){
+      btn.disabled = true;
+      document.getElementById('auBtnInner').innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"' +
+        ' stroke="rgba(11,12,16,.85)" stroke-width="2.5" stroke-linecap="round"' +
+        ' style="animation:auSpin .75s linear infinite">' +
+        '<path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg> Saving…';
+    });
+  })();
+</script>
+
+{% endblock content %}

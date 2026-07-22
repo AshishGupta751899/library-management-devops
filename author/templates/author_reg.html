@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#0b0c10 !important; color:#eef0f5 !important; }
+
+  .ar-section {
+    min-height: calc(100vh - 64px);
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+    background: #0b0c10;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ambient */
+  .ar-section::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 60% 55% at 5%  45%, rgba(45,212,191,.07)  0%,transparent 55%),
+      radial-gradient(ellipse 50% 55% at 95% 75%, rgba(201,168,76,.06)  0%,transparent 55%),
+      radial-gradient(ellipse 35% 40% at 55%  5%, rgba(139,92,246,.05)  0%,transparent 50%);
+  }
+  /* Grid */
+  .ar-section::after {
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.013) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.013) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%);
+    -webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%);
+  }
+
+  .ar-inner {
+    position:relative; z-index:1;
+    max-width:1100px; margin:0 auto;
+    padding:4rem 1.5rem;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:4rem; align-items:center;
+    width:100%;
+  }
+
+  /* ══ LEFT HERO ══ */
+  .ar-hero { display:flex; flex-direction:column; gap:1.5rem; }
+
+  .ar-badge {
+    display:inline-flex; align-items:center; gap:.45rem;
+    padding:.32rem .85rem;
+    background:rgba(45,212,191,.1);
+    border:1px solid rgba(45,212,191,.22);
+    border-radius:999px;
+    font-size:.72rem; font-weight:600;
+    color:#2dd4bf; letter-spacing:.07em;
+    text-transform:uppercase; width:fit-content;
+  }
+  .ar-badge-dot {
+    width:5px; height:5px; border-radius:50%;
+    background:#2dd4bf;
+    box-shadow:0 0 6px rgba(45,212,191,.7);
+    animation:arPulse 2s ease-in-out infinite;
+  }
+  @keyframes arPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .ar-headline {
+    font-size:clamp(2rem,4vw,2.75rem);
+    font-weight:800; line-height:1.15;
+    letter-spacing:-.03em; color:#eef0f5;
+  }
+  .ar-headline em {
+    font-style:normal;
+    background:linear-gradient(120deg,#5eead4,#2dd4bf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .ar-sub {
+    font-size:.95rem; line-height:1.75;
+    color:rgba(238,240,245,.62); max-width:380px;
+  }
+
+  /* Feature cards */
+  .ar-feats { display:flex; flex-direction:column; gap:.65rem; }
+  .ar-feat {
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding:.85rem 1rem;
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:12px; transition:border .2s;
+  }
+  .ar-feat:hover { border-color:rgba(45,212,191,.2); }
+  .ar-feat-icon {
+    width:34px; height:34px; border-radius:9px; flex-shrink:0;
+    background:rgba(45,212,191,.1);
+    border:1px solid rgba(45,212,191,.18);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ar-feat-icon svg { width:15px; height:15px; color:#2dd4bf; }
+  .ar-feat-title { font-size:.82rem; font-weight:600; color:#eef0f5; margin-bottom:.18rem; }
+  .ar-feat-desc  { font-size:.75rem; color:rgba(238,240,245,.45); line-height:1.5; }
+
+  /* Stats */
+  .ar-stats { display:flex; gap:1.75rem; padding-top:.5rem; border-top:1px solid rgba(255,255,255,.07); }
+  .ar-stat-num { font-size:1.4rem; font-weight:800; color:#2dd4bf; letter-spacing:-.02em; }
+  .ar-stat-lbl { font-size:.68rem; color:rgba(238,240,245,.38); text-transform:uppercase; letter-spacing:.08em; margin-top:.1rem; }
+
+  /* ══ RIGHT FORM CARD ══ */
+  .ar-card {
+    background:linear-gradient(160deg,rgba(255,255,255,.038) 0%,rgba(255,255,255,.015) 100%);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:22px; padding:2.25rem;
+    position:relative; overflow:hidden;
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  }
+  .ar-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(45,212,191,.5),rgba(94,234,212,.3),transparent);
+  }
+
+  .ar-card-head {
+    display:flex; align-items:center; gap:.65rem;
+    margin-bottom:1.6rem; padding-bottom:1.2rem;
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .ar-card-icon {
+    width:38px; height:38px; border-radius:11px; flex-shrink:0;
+    background:linear-gradient(135deg,#0f766e,#2dd4bf);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 14px rgba(45,212,191,.28);
+  }
+  .ar-card-icon svg { width:17px; height:17px; }
+  .ar-card-title { font-size:1.05rem; font-weight:700; color:#eef0f5; }
+  .ar-card-sub   { font-size:.72rem; color:rgba(238,240,245,.42); margin-top:1px; }
+
+  /* Form fields */
+  .ar-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  .ar-field { margin-bottom:.88rem; }
+  .ar-field label {
+    display:block; margin-bottom:.4rem;
+    font-size:.7rem; font-weight:600;
+    color:rgba(238,240,245,.62);
+    text-transform:uppercase; letter-spacing:.08em;
+  }
+  .ar-input-wrap { position:relative; }
+  .ar-input-icon {
+    position:absolute; left:.88rem; top:50%; transform:translateY(-50%);
+    color:rgba(238,240,245,.28); pointer-events:none;
+    display:flex; transition:color .2s;
+  }
+  .ar-input-wrap:focus-within .ar-input-icon { color:#2dd4bf; }
+
+  /* Django widget override */
+  .ar-field input {
+    width:100% !important;
+    background:rgba(255,255,255,.03) !important;
+    border:1px solid rgba(255,255,255,.07) !important;
+    border-radius:10px !important;
+    color:#eef0f5 !important;
+    padding:.66rem .9rem .66rem 2.5rem !important;
+    font-size:.86rem !important;
+    font-family:'DM Sans',system-ui,sans-serif !important;
+    outline:none !important;
+    transition:border .22s,box-shadow .22s,background .22s !important;
+    caret-color:#2dd4bf !important;
+    box-sizing:border-box !important;
+  }
+  .ar-field input::placeholder { color:rgba(238,240,245,.18) !important; }
+  .ar-field input:hover  { border-color:rgba(255,255,255,.12) !important; background:rgba(255,255,255,.04) !important; }
+  .ar-field input:focus  {
+    border-color:rgba(45,212,191,.45) !important;
+    background:rgba(45,212,191,.03) !important;
+    box-shadow:0 0 0 3px rgba(45,212,191,.1) !important;
+  }
+
+  /* Password toggle */
+  .ar-pw-toggle {
+    position:absolute; right:.88rem; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer;
+    color:rgba(238,240,245,.28); padding:0; display:flex; transition:color .2s;
+  }
+  .ar-pw-toggle:hover { color:#2dd4bf; }
+  .ar-pw-toggle svg { width:14px; height:14px; }
+
+  /* Errors */
+  .ar-field ul.errorlist { list-style:none !important; margin:.28rem 0 0 !important; padding:0 !important; }
+  .ar-field ul.errorlist li {
+    font-size:.72rem !important; color:#f87171 !important;
+    padding:.25rem .65rem !important;
+    background:rgba(248,113,113,.08) !important;
+    border:1px solid rgba(248,113,113,.22) !important;
+    border-radius:6px !important; margin-top:.2rem !important;
+  }
+  .ar-field ul.errorlist li::before { content:'⚠ '; }
+
+  /* Strength meter */
+  .ar-strength { margin-top:.45rem; display:none; }
+  .ar-strength-bars { display:flex; gap:3px; height:3px; }
+  .ar-strength-bars span { flex:1; border-radius:2px; background:rgba(255,255,255,.06); transition:background .28s; }
+  .ar-strength-lbl { font-size:.67rem; color:rgba(238,240,245,.38); margin-top:.28rem; }
+
+  /* Terms */
+  .ar-terms-row {
+    display:flex; align-items:flex-start; gap:.6rem;
+    margin-bottom:1.1rem; cursor:pointer;
+  }
+  .ar-terms-row input[type=checkbox] { display:none; }
+  .ar-check {
+    width:18px; height:18px; flex-shrink:0;
+    border:1px solid rgba(255,255,255,.1); border-radius:5px;
+    background:rgba(255,255,255,.03);
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s; margin-top:1px;
+  }
+  .ar-terms-row:has(input:checked) .ar-check {
+    background:linear-gradient(135deg,#0f766e,#2dd4bf);
+    border-color:transparent; box-shadow:0 0 10px rgba(45,212,191,.3);
+  }
+  .ar-check-svg { display:none; }
+  .ar-terms-row:has(input:checked) .ar-check-svg { display:block; }
+  .ar-terms-text { font-size:.78rem; color:rgba(238,240,245,.45); line-height:1.5; }
+  .ar-terms-text a { color:#2dd4bf; text-decoration:none; }
+  .ar-terms-text a:hover { text-decoration:underline; }
+
+  /* Actions */
+  .ar-actions { display:flex; gap:.65rem; align-items:center; }
+
+  .ar-btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+    padding:.72rem 1.4rem; border-radius:10px;
+    font-size:.86rem; font-weight:700;
+    border:none; cursor:pointer;
+    font-family:'DM Sans',system-ui,sans-serif;
+    text-decoration:none; transition:all .2s;
+    position:relative; overflow:hidden;
+  }
+  .ar-btn-primary {
+    background:linear-gradient(135deg,#0f766e,#2dd4bf);
+    color:#0b0c10; flex:1;
+    box-shadow:0 3px 14px rgba(45,212,191,.25);
+  }
+  .ar-btn-primary::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);
+    opacity:0; transition:opacity .2s;
+  }
+  .ar-btn-primary:hover { box-shadow:0 6px 22px rgba(45,212,191,.4); transform:translateY(-1px); }
+  .ar-btn-primary:hover::before { opacity:1; }
+  .ar-btn-primary:active { transform:translateY(0); }
+  .ar-btn-primary:disabled { opacity:.65; cursor:not-allowed; }
+
+  .ar-btn-ghost {
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08) !important;
+    color:rgba(238,240,245,.55);
+    padding:.72rem 1.1rem;
+  }
+  .ar-btn-ghost:hover { background:rgba(255,255,255,.08); color:#eef0f5; }
+
+  /* Ripple */
+  .ar-ripple {
+    position:absolute; border-radius:50%;
+    background:rgba(11,12,16,.25);
+    transform:scale(0);
+    animation:arRip .5s ease-out forwards; pointer-events:none;
+  }
+  @keyframes arRip  { to { transform:scale(4); opacity:0; } }
+  @keyframes arSpin { to { transform:rotate(360deg); } }
+
+  /* Responsive */
+  @media (max-width:840px) {
+    .ar-inner { grid-template-columns:1fr; gap:2.5rem; padding:2.5rem 1.25rem; }
+    .ar-hero  { text-align:center; align-items:center; }
+    .ar-sub   { max-width:100%; }
+    .ar-row   { grid-template-columns:1fr; }
+  }
+  @media (max-width:480px) {
+    .ar-card    { padding:1.5rem 1.1rem; }
+    .ar-actions { flex-direction:column; }
+    .ar-btn-ghost { width:100%; }
+  }
+</style>
+
+<section class="ar-section">
+  <div class="ar-inner">
+
+    <!-- ═══ LEFT HERO ═══ -->
+    <div class="ar-hero">
+
+      <div class="ar-badge">
+        <div class="ar-badge-dot" aria-hidden="true"></div>
+        Author Portal
+      </div>
+
+      <h1 class="ar-headline">
+        Share your story<br>with <em>BookVault.</em>
+      </h1>
+
+      <p class="ar-sub">
+        Join our growing community of authors. Publish your work,
+        reach thousands of readers, and manage your catalogue — all from one dashboard.
+      </p>
+
+      <!-- Feature cards -->
+      <div class="ar-feats">
+        <div class="ar-feat">
+          <div class="ar-feat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ar-feat-title">Publish &amp; Manage Books</div>
+            <div class="ar-feat-desc">Upload your titles, set availability, and track rentals in real time.</div>
+          </div>
+        </div>
+        <div class="ar-feat">
+          <div class="ar-feat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ar-feat-title">Reach 3,400+ Students</div>
+            <div class="ar-feat-desc">Your books are discoverable by every registered student on the platform.</div>
+          </div>
+        </div>
+        <div class="ar-feat">
+          <div class="ar-feat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ar-feat-title">Analytics &amp; Insights</div>
+            <div class="ar-feat-desc">See how many students are renting your books and when they return them.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="ar-stats" aria-label="Platform statistics">
+        <div class="ar-stat">
+          <div class="ar-stat-num">800+</div>
+          <div class="ar-stat-lbl">Authors</div>
+        </div>
+        <div class="ar-stat">
+          <div class="ar-stat-num">12K</div>
+          <div class="ar-stat-lbl">Books</div>
+        </div>
+        <div class="ar-stat">
+          <div class="ar-stat-num">Free</div>
+          <div class="ar-stat-lbl">Forever</div>
+        </div>
+      </div>
+
+    </div><!-- /.ar-hero -->
+
+    <!-- ═══ RIGHT FORM ═══ -->
+    <div class="ar-card" role="main" aria-labelledby="arFormTitle">
+
+      <div class="ar-card-head">
+        <div class="ar-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(11,12,16,.9)"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ar-card-title" id="arFormTitle">Author Registration</div>
+          <div class="ar-card-sub">Create your free author account</div>
+        </div>
+      </div>
+
+      <!-- ─── Django form — ALL tags preserved ─── -->
+      <form method="post" action="" novalidate id="arForm">
+        {% csrf_token %}
+
+        <!-- Username + First name -->
+        <div class="ar-row">
+          <div class="ar-field">
+            {{ form.username.label_tag }}
+            <div class="ar-input-wrap">
+              <span class="ar-input-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              {{ form.username }}
+              {{ form.username.errors }}
+            </div>
+          </div>
+          <div class="ar-field">
+            {{ form.first_name.label_tag }}
+            <div class="ar-input-wrap">
+              <span class="ar-input-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              {{ form.first_name }}
+              {{ form.first_name.errors }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="ar-field">
+          {{ form.email.label_tag }}
+          <div class="ar-input-wrap">
+            <span class="ar-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </span>
+            {{ form.email }}
+            {{ form.email.errors }}
+          </div>
+        </div>
+
+        <!-- Password 1 -->
+        <div class="ar-field">
+          {{ form.password1.label_tag }}
+          <div class="ar-input-wrap">
+            <span class="ar-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            {{ form.password1 }}
+            {{ form.password1.errors }}
+            <button type="button" class="ar-pw-toggle" id="arPw1Toggle"
+                    onclick="arTogglePw('arPw1Toggle',this)" aria-label="Show/hide password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Strength meter -->
+          <div class="ar-strength" id="arStrength" aria-live="polite">
+            <div class="ar-strength-bars">
+              <span id="asb1"></span><span id="asb2"></span>
+              <span id="asb3"></span><span id="asb4"></span>
+            </div>
+            <div class="ar-strength-lbl" id="asbLabel"></div>
+          </div>
+        </div>
+
+        <!-- Password 2 -->
+        <div class="ar-field">
+          {{ form.password2.label_tag }}
+          <div class="ar-input-wrap">
+            <span class="ar-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+            <button type="button" class="ar-pw-toggle" id="arPw2Toggle"
+                    onclick="arTogglePw('arPw2Toggle',this)" aria-label="Show/hide confirm password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <label class="ar-terms-row" for="arTerms">
+          <input type="checkbox" id="arTerms" name="terms"/>
+          <div class="ar-check" aria-hidden="true">
+            <svg class="ar-check-svg" width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4l3 3 5-6" stroke="rgba(11,12,16,.9)" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="ar-terms-text">
+            I agree to the <a href="#">Terms of Service</a> and <a href="#">Author Publishing Policy</a>
+          </span>
+        </label>
+
+        <!-- Actions -->
+        <div class="ar-actions">
+          <button type="submit" class="ar-btn ar-btn-primary" id="arSubmit">
+            <div class="ar-btn-inner" id="arBtnInner">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="rgba(11,12,16,.85)" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+              Register Now
+            </div>
+          </button>
+          <a href="{% url 'user_login' %}" class="ar-btn ar-btn-ghost" aria-label="Go to login">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            Sign In
+          </a>
+        </div>
+
+      </form>
+      <!-- ─────────────────────────────── -->
+
+      <p style="margin-top:.9rem;font-size:.7rem;color:rgba(238,240,245,.3);text-align:center;">
+        Already an author? <a href="{% url 'user_login' %}" style="color:#2dd4bf;text-decoration:none;">Sign in to your account →</a>
+      </p>
+
+    </div><!-- /.ar-card -->
+
+  </div><!-- /.ar-inner -->
+</section>
+
+<script>
+  /* ── Password show/hide ── */
+  function arTogglePw(btnId, btn) {
+    /* find the closest input[type=password/text] sibling */
+    var wrap = btn.closest('.ar-input-wrap');
+    var inp  = wrap ? wrap.querySelector('input') : null;
+    if (!inp) return;
+    var svg  = btn.querySelector('svg');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      svg.innerHTML =
+        '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8' +
+        'a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8' +
+        'a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>' +
+        '<line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      inp.type = 'password';
+      svg.innerHTML =
+        '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>' +
+        '<circle cx="12" cy="12" r="3"/>';
+    }
+  }
+
+  /* ── Password strength ── */
+  (function(){
+    var pw = document.querySelector('[name="password1"]');
+    if (!pw) return;
+    pw.addEventListener('input', function(){
+      var val  = this.value;
+      var wrap = document.getElementById('arStrength');
+      if (!val) { wrap.style.display = 'none'; return; }
+      wrap.style.display = 'block';
+      var score = 0;
+      if (val.length >= 8)           score++;
+      if (/[A-Z]/.test(val))         score++;
+      if (/[0-9]/.test(val))         score++;
+      if (/[^A-Za-z0-9]/.test(val))  score++;
+      var colors = ['#ef4444','#f97316','#eab308','#2dd4bf'];
+      var labels = ['Weak','Fair','Good','Strong'];
+      ['asb1','asb2','asb3','asb4'].forEach(function(id,i){
+        document.getElementById(id).style.background =
+          i < score ? colors[score-1] : 'rgba(255,255,255,.06)';
+      });
+      var lbl = document.getElementById('asbLabel');
+      lbl.textContent = labels[score-1] || '';
+      lbl.style.color = colors[score-1] || 'rgba(238,240,245,.38)';
+    });
+  })();
+
+  /* ── Ripple + loading on submit ── */
+  (function(){
+    var btn  = document.getElementById('arSubmit');
+    var form = document.getElementById('arForm');
+    if (!btn || !form) return;
+    btn.addEventListener('click', function(e){
+      var r = document.createElement('span');
+      r.className = 'ar-ripple';
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      r.style.cssText =
+        'width:'+size+'px;height:'+size+'px;' +
+        'left:'+(e.clientX-rect.left-size/2)+'px;' +
+        'top:'+(e.clientY-rect.top-size/2)+'px;';
+      btn.appendChild(r);
+      setTimeout(function(){ r.remove(); }, 520);
+    });
+    form.addEventListener('submit', function(){
+      btn.disabled = true;
+      document.getElementById('arBtnInner').innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"' +
+        ' stroke="rgba(11,12,16,.85)" stroke-width="2.5" stroke-linecap="round"' +
+        ' style="animation:arSpin .75s linear infinite">' +
+        '<path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg> Creating account…';
+    });
+  })();
+</script>
+
+{% endblock content %}

@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#0b0c10 !important; color:#eef0f5 !important; }
+
+  .lp-section {
+    min-height: calc(100vh - 64px);
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+    background: #0b0c10;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ambient */
+  .lp-section::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 60% 55% at 8%  50%, rgba(201,168,76,.08) 0%,transparent 55%),
+      radial-gradient(ellipse 50% 50% at 92% 80%, rgba(45,212,191,.05) 0%,transparent 55%),
+      radial-gradient(ellipse 35% 40% at 55% 5%,  rgba(139,92,246,.05) 0%,transparent 50%);
+  }
+  /* Grid */
+  .lp-section::after {
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.013) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.013) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%);
+    -webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%);
+  }
+
+  .lp-inner {
+    position:relative; z-index:1;
+    max-width:1100px; margin:0 auto;
+    padding:4rem 1.5rem;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:4rem; align-items:center;
+    width:100%;
+  }
+
+  /* ── LEFT HERO ── */
+  .lp-hero { display:flex; flex-direction:column; gap:1.5rem; }
+
+  .lp-badge {
+    display:inline-flex; align-items:center; gap:.45rem;
+    padding:.32rem .85rem;
+    background:rgba(201,168,76,.12);
+    border:1px solid rgba(201,168,76,.22);
+    border-radius:999px;
+    font-size:.72rem; font-weight:600;
+    color:#e8c97a; letter-spacing:.07em;
+    text-transform:uppercase; width:fit-content;
+  }
+  .lp-badge-dot {
+    width:5px; height:5px; border-radius:50%;
+    background:#c9a84c;
+    box-shadow:0 0 6px rgba(201,168,76,.7);
+    animation:lpPulse 2s ease-in-out infinite;
+  }
+  @keyframes lpPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .lp-headline {
+    font-size:clamp(2rem,4vw,2.75rem);
+    font-weight:800; line-height:1.15;
+    letter-spacing:-.03em; color:#eef0f5;
+  }
+  .lp-headline em {
+    font-style:normal;
+    background:linear-gradient(120deg,#e8c97a,#c9a84c);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .lp-sub {
+    font-size:.95rem; line-height:1.75;
+    color:rgba(238,240,245,.62); max-width:380px;
+  }
+
+  /* Info cards */
+  .lp-cards { display:flex; flex-direction:column; gap:.65rem; }
+  .lp-card {
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding:.85rem 1rem;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:12px;
+    transition:border .2s;
+  }
+  .lp-card:hover { border-color:rgba(201,168,76,.2); }
+  .lp-card-icon {
+    width:34px; height:34px; border-radius:9px; flex-shrink:0;
+    background:rgba(201,168,76,.12);
+    border:1px solid rgba(201,168,76,.18);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lp-card-icon svg { width:15px; height:15px; color:#e8c97a; }
+  .lp-card-title { font-size:.82rem; font-weight:600; color:#eef0f5; margin-bottom:.18rem; }
+  .lp-card-desc  { font-size:.75rem; color:rgba(238,240,245,.45); line-height:1.5; }
+
+  /* ── RIGHT FORM CARD ── */
+  .lp-form-card {
+    background:linear-gradient(160deg,rgba(255,255,255,.038) 0%,rgba(255,255,255,.015) 100%);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:22px; padding:2.25rem;
+    position:relative; overflow:hidden;
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  }
+  .lp-form-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(201,168,76,.5),rgba(232,201,122,.35),transparent);
+  }
+
+  .lp-form-head {
+    display:flex; align-items:center; gap:.65rem;
+    margin-bottom:1.6rem; padding-bottom:1.2rem;
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .lp-form-icon {
+    width:38px; height:38px; border-radius:11px; flex-shrink:0;
+    background:linear-gradient(135deg,#9a6a22,#c9a84c);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 14px rgba(201,168,76,.3);
+  }
+  .lp-form-icon svg { width:17px; height:17px; }
+  .lp-form-title { font-size:1.05rem; font-weight:700; color:#eef0f5; }
+  .lp-form-sub   { font-size:.72rem; color:rgba(238,240,245,.42); margin-top:1px; }
+
+  /* Role selector */
+  .lp-roles { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-bottom:1.2rem; }
+  .lp-role {
+    display:flex; align-items:center; justify-content:center; gap:.4rem;
+    padding:.55rem; border-radius:9px; cursor:pointer;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    font-size:.78rem; font-weight:500;
+    color:rgba(238,240,245,.55);
+    transition:all .18s; user-select:none;
+  }
+  .lp-role input[type=radio] { display:none; }
+  .lp-role:has(input:checked) {
+    background:rgba(201,168,76,.12);
+    border-color:rgba(201,168,76,.35);
+    color:#e8c97a;
+  }
+  .lp-role svg { width:13px; height:13px; }
+
+  /* Fields */
+  .lp-field { margin-bottom:.9rem; }
+  .lp-field label {
+    display:block; margin-bottom:.4rem;
+    font-size:.7rem; font-weight:600;
+    color:rgba(238,240,245,.62);
+    text-transform:uppercase; letter-spacing:.08em;
+  }
+  .lp-input-wrap { position:relative; }
+  .lp-input-icon {
+    position:absolute; left:.88rem; top:50%; transform:translateY(-50%);
+    color:rgba(238,240,245,.3); pointer-events:none; display:flex;
+    transition:color .2s;
+  }
+  .lp-input-wrap:focus-within .lp-input-icon { color:#c9a84c; }
+
+  /* Django widget override */
+  .lp-field input,
+  .lp-field select {
+    width:100% !important;
+    background:rgba(255,255,255,.03) !important;
+    border:1px solid rgba(255,255,255,.07) !important;
+    border-radius:10px !important;
+    color:#eef0f5 !important;
+    padding:.66rem .9rem .66rem 2.5rem !important;
+    font-size:.86rem !important;
+    font-family:'DM Sans',system-ui,sans-serif !important;
+    outline:none !important;
+    transition:border .22s, box-shadow .22s, background .22s !important;
+    caret-color:#e8c97a !important;
+    box-sizing:border-box !important;
+  }
+  .lp-field input::placeholder { color:rgba(238,240,245,.18) !important; }
+  .lp-field input:hover  { border-color:rgba(255,255,255,.12) !important; background:rgba(255,255,255,.04) !important; }
+  .lp-field input:focus  {
+    border-color:rgba(201,168,76,.45) !important;
+    background:rgba(201,168,76,.03) !important;
+    box-shadow:0 0 0 3px rgba(201,168,76,.1) !important;
+  }
+
+  /* Errors */
+  .lp-field ul.errorlist { list-style:none !important; margin:.28rem 0 0 !important; padding:0 !important; }
+  .lp-field ul.errorlist li {
+    font-size:.72rem !important; color:#f87171 !important;
+    padding:.25rem .65rem !important;
+    background:rgba(248,113,113,.08) !important;
+    border:1px solid rgba(248,113,113,.22) !important;
+    border-radius:6px !important; margin-top:.2rem !important;
+  }
+  .lp-field ul.errorlist li::before { content:'⚠ '; }
+
+  /* Password toggle */
+  .lp-pw-toggle {
+    position:absolute; right:.88rem; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer;
+    color:rgba(238,240,245,.3); padding:0; display:flex;
+    transition:color .2s;
+  }
+  .lp-pw-toggle:hover { color:#c9a84c; }
+  .lp-pw-toggle svg { width:14px; height:14px; }
+
+  /* Forgot */
+  .lp-forgot {
+    display:flex; justify-content:flex-end;
+    margin-top:.35rem; margin-bottom:.2rem;
+  }
+  .lp-forgot a {
+    font-size:.72rem; color:rgba(201,168,76,.7);
+    text-decoration:none; transition:color .18s;
+  }
+  .lp-forgot a:hover { color:#e8c97a; }
+
+  /* Submit */
+  .lp-submit {
+    width:100%; padding:.75rem;
+    border:none; border-radius:10px;
+    background:linear-gradient(135deg,#9a6a22,#c9a84c);
+    color:#0b0c10;
+    font-size:.88rem; font-weight:700;
+    font-family:'DM Sans',system-ui,sans-serif;
+    cursor:pointer; position:relative; overflow:hidden;
+    box-shadow:0 3px 14px rgba(201,168,76,.28);
+    transition:transform .2s, box-shadow .2s;
+    margin-top:1rem;
+  }
+  .lp-submit::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);
+    opacity:0; transition:opacity .2s;
+  }
+  .lp-submit:hover { transform:translateY(-1px); box-shadow:0 6px 22px rgba(201,168,76,.4); }
+  .lp-submit:hover::before { opacity:1; }
+  .lp-submit:active { transform:translateY(0); }
+  .lp-submit:disabled { opacity:.65; cursor:not-allowed; }
+  .lp-btn-inner { display:flex; align-items:center; justify-content:center; gap:.45rem; }
+
+  /* Divider */
+  .lp-divider { display:flex; align-items:center; gap:.6rem; margin:1.1rem 0; }
+  .lp-divider-line { flex:1; height:1px; background:rgba(255,255,255,.07); }
+  .lp-divider-text { font-size:.7rem; color:rgba(238,240,245,.35); }
+
+  /* Register link */
+  .lp-register {
+    display:flex; gap:.5rem;
+  }
+  .lp-reg-btn {
+    flex:1; display:flex; align-items:center; justify-content:center; gap:.4rem;
+    padding:.6rem; border-radius:9px;
+    font-size:.78rem; font-weight:600;
+    text-decoration:none; border:1px solid rgba(255,255,255,.07);
+    background:rgba(255,255,255,.03);
+    color:rgba(238,240,245,.55);
+    transition:all .18s;
+  }
+  .lp-reg-btn:hover { background:rgba(255,255,255,.07); color:#eef0f5; border-color:rgba(255,255,255,.12); }
+
+  /* Ripple */
+  .lp-ripple {
+    position:absolute; border-radius:50%;
+    background:rgba(11,12,16,.25);
+    transform:scale(0);
+    animation:lpRip .5s ease-out forwards;
+    pointer-events:none;
+  }
+  @keyframes lpRip { to { transform:scale(4); opacity:0; } }
+  @keyframes lpSpin { to { transform:rotate(360deg); } }
+
+  /* ── Responsive ── */
+  @media (max-width:840px) {
+    .lp-inner { grid-template-columns:1fr; gap:2rem; padding:2.5rem 1.25rem; }
+    .lp-hero  { text-align:center; align-items:center; }
+    .lp-sub   { max-width:100%; }
+  }
+  @media (max-width:480px) {
+    .lp-form-card { padding:1.5rem 1.1rem; }
+  }
+</style>
+
+<section class="lp-section">
+  <div class="lp-inner">
+
+    <!-- ═══ LEFT HERO ═══ -->
+    <div class="lp-hero">
+
+      <div class="lp-badge">
+        <div class="lp-badge-dot" aria-hidden="true"></div>
+        Member Portal
+      </div>
+
+      <h1 class="lp-headline">
+        Welcome back<br>to <em>BookVault.</em>
+      </h1>
+
+      <p class="lp-sub">
+        Sign in to access your library dashboard, manage rentals,
+        and discover thousands of books curated just for you.
+      </p>
+
+      <!-- Info cards -->
+      <div class="lp-cards">
+        <div class="lp-card">
+          <div class="lp-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="lp-card-title">12,000+ Books Available</div>
+            <div class="lp-card-desc">Browse, reserve, and rent from our curated digital catalogue instantly.</div>
+          </div>
+        </div>
+        <div class="lp-card">
+          <div class="lp-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div>
+            <div class="lp-card-title">Real-time Rental Tracking</div>
+            <div class="lp-card-desc">Know your due dates, history, and availability — all from your dashboard.</div>
+          </div>
+        </div>
+        <div class="lp-card">
+          <div class="lp-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="lp-card-title">Secure &amp; Private</div>
+            <div class="lp-card-desc">Your data is encrypted and never shared. 256-bit SSL on every request.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.lp-hero -->
+
+    <!-- ═══ RIGHT FORM ═══ -->
+    <div class="lp-form-card" role="main" aria-labelledby="loginTitle">
+
+      <div class="lp-form-head">
+        <div class="lp-form-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(11,12,16,.9)"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="lp-form-title" id="loginTitle">Sign In to BookVault</div>
+          <div class="lp-form-sub">Enter your credentials to continue</div>
+        </div>
+      </div>
+
+      <!-- ─── Django form — all tags preserved ─── -->
+      <form method="post" action="" novalidate id="lpForm">
+        {% csrf_token %}
+
+        <!-- Role selector (replaces old plain <select>) -->
+        <div class="lp-roles" role="radiogroup" aria-label="Select your role">
+          <label class="lp-role" style="background-color: rgb(14, 15, 0);">
+            <input type="radio" name="user_type" value="student" checked/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+            Log in as Student
+          </label>
+          <label class="lp-role" style="background-color: rgba(1, 89, 36, 0.518);">
+            <input type="radio" name="user_type" value="author"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            Login in as Author
+          </label>
+        </div>
+
+        <!-- Username -->
+        <div class="lp-field">
+          {{ form.username.label_tag }}
+          <div class="lp-input-wrap">
+            <span class="lp-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            {{ form.username }}
+            {{ form.username.errors }}
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="lp-field">
+          {{ form.password.label_tag }}
+          <div class="lp-input-wrap">
+            <span class="lp-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            {{ form.password }}
+            {{ form.password.errors }}
+            <button type="button" class="lp-pw-toggle" id="lpPwToggle"
+                    onclick="lpTogglePw()" aria-label="Show/hide password">
+              <svg id="lpEyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Forgot password -->
+        <div class="lp-forgot">
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="lp-submit" id="lpSubmit">
+          <div class="lp-btn-inner" id="lpBtnInner">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(11,12,16,.85)" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            Sign In
+          </div>
+        </button>
+
+      </form>
+      <!-- ─────────────────────────────────────── -->
+
+      <!-- Register options -->
+      <div class="lp-divider">
+        <div class="lp-divider-line"></div>
+        <span class="lp-divider-text">Don't have an account?</span>
+        <div class="lp-divider-line"></div>
+      </div>
+
+      <div class="lp-register">
+        <a href="{% url 'student_reg' %}" class="lp-reg-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+          Student Sign Up
+        </a>
+        <a href="{% url 'author_reg' %}" class="lp-reg-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          Author Sign Up
+        </a>
+      </div>
+
+    </div><!-- /.lp-form-card -->
+
+  </div><!-- /.lp-inner -->
+</section>
+
+<script>
+  /* ── Password show/hide ── */
+  function lpTogglePw() {
+    var inp  = document.querySelector('[name="password"]');
+    var icon = document.getElementById('lpEyeIcon');
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.innerHTML =
+        '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8' +
+        'a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8' +
+        'a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>' +
+        '<line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      inp.type = 'password';
+      icon.innerHTML =
+        '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>' +
+        '<circle cx="12" cy="12" r="3"/>';
+    }
+  }
+
+  /* ── Ripple + loading on submit ── */
+  (function(){
+    var btn  = document.getElementById('lpSubmit');
+    var form = document.getElementById('lpForm');
+    if (!btn || !form) return;
+
+    btn.addEventListener('click', function(e){
+      var r    = document.createElement('span');
+      r.className = 'lp-ripple';
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      r.style.cssText =
+        'width:'+size+'px;height:'+size+'px;' +
+        'left:'+(e.clientX-rect.left-size/2)+'px;' +
+        'top:'+(e.clientY-rect.top-size/2)+'px;';
+      btn.appendChild(r);
+      setTimeout(function(){ r.remove(); }, 520);
+    });
+
+    form.addEventListener('submit', function(){
+      btn.disabled = true;
+      document.getElementById('lpBtnInner').innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"' +
+        ' stroke="rgba(11,12,16,.85)" stroke-width="2.5" stroke-linecap="round"' +
+        ' style="animation:lpSpin .75s linear infinite">' +
+        '<path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg> Signing in…';
+    });
+  })();
+</script>
+
+<style>
+  @keyframes lpSpin { to { transform:rotate(360deg); } }
+</style>
+
+{% endblock content %}

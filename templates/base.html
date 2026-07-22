@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block dev %}
+    <!-- header -->
+  <style>
+  :root {
+    --gold:  #c9a84c;
+    --gold2: #e8c97a;
+    --teal:  #2dd4bf;
+    --bg-nav:#0d0e13;
+    --border:rgba(255,255,255,0.07);
+    --muted: rgba(238,240,245,0.45);
+    --muted2:rgba(238,240,245,0.70);
+    --text:  #eef0f5;
+    --gold-dim:rgba(201,168,76,0.13);
+  }
+  .bv-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,14,19,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .bv-inner {
+    max-width: 1280px; margin: 0 auto;
+    padding: 0 1.5rem; height: 62px;
+    display: flex; align-items: center; gap: 1rem;
+  }
+
+  /* ── Logo ── */
+  .bv-logo {
+    display: flex; align-items: center; gap: .55rem;
+    text-decoration: none; flex-shrink: 0;
+  }
+  .bv-logo-icon {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg,#9a6a22,var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 14px rgba(201,168,76,.28);
+  }
+  .bv-logo-icon svg { width: 17px; height: 17px; }
+  .bv-logo-label {
+    display: flex; flex-direction: column; line-height: 1.1;
+  }
+  .bv-logo-name {
+    font-size: 1.05rem; font-weight: 700;
+    background: linear-gradient(120deg,#e8c97a,#c9a84c);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; letter-spacing: .01em;
+  }
+  .bv-logo-sub {
+    font-size: .52rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ── Nav links ── */
+  .bv-links {
+    display: flex; align-items: center; gap: .15rem;
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--border);
+    flex: 1;
+  }
+  .bv-link {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .38rem .75rem;
+    border-radius: 7px;
+    font-size: .8rem; font-weight: 500;
+    color: var(--muted2);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .15s, color .15s;
+  }
+  .bv-link:hover { background: rgba(255,255,255,.06); color: var(--text); }
+  .bv-link svg { flex-shrink: 0; opacity: .7; }
+
+  /* ── Right actions ── */
+  .bv-actions { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+
+  /* User chip */
+  .bv-chip {
+    display: inline-flex; align-items: center; gap: .42rem;
+    padding: .32rem .8rem .32rem .42rem;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,.22);
+    border-radius: 999px;
+    font-size: .78rem; font-weight: 600; color: var(--gold2);
+    text-decoration: none; transition: background .18s;
+    white-space: nowrap;
+  }
+  .bv-chip:hover { background: rgba(201,168,76,.22); }
+  .bv-chip-av {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg,#9a6a22,var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .6rem; font-weight: 700; color: #0d0e13;
+    flex-shrink: 0;
+  }
+
+  /* Buttons */
+  .bv-btn {
+    display: inline-flex; align-items: center; gap: .38rem;
+    padding: .4rem 1rem; border-radius: 8px;
+    font-size: .78rem; font-weight: 600;
+    text-decoration: none; border: none; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+    transition: all .18s;
+  }
+  .bv-btn-teal {
+    background: rgba(45,212,191,.1);
+    border: 1px solid rgba(45,212,191,.22);
+    color: var(--teal);
+  }
+  .bv-btn-teal:hover { background: rgba(45,212,191,.2); }
+  .bv-btn-gold {
+    background: linear-gradient(135deg,#9a6a22,var(--gold));
+    color: #0d0e13;
+    box-shadow: 0 2px 10px rgba(201,168,76,.22);
+  }
+  .bv-btn-gold:hover { box-shadow: 0 4px 18px rgba(201,168,76,.38); transform: translateY(-1px); }
+
+  /* ── Mobile ── */
+  .bv-burger {
+    display: none; flex-direction: column; gap: 4px;
+    background: none; border: none; cursor: pointer; padding: .35rem; margin-left: auto;
+  }
+  .bv-burger span {
+    display: block; width: 20px; height: 2px;
+    background: var(--muted2); border-radius: 2px; transition: all .25s;
+  }
+  .bv-mob {
+    display: none;
+    background: rgba(13,14,19,.97);
+    border-bottom: 1px solid var(--border);
+    padding: .85rem 1.5rem;
+    flex-direction: column; gap: .3rem;
+  }
+  .bv-mob.open { display: flex; }
+  .bv-mob-actions {
+    display: flex; gap: .5rem;
+    padding-top: .75rem; margin-top: .4rem;
+    border-top: 1px solid var(--border);
+  }
+  .bv-mob-actions .bv-btn { flex: 1; justify-content: center; }
+
+  @media (max-width: 768px) {
+    .bv-links, .bv-actions { display: none; }
+    .bv-burger { display: flex; }
+  }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+<!-- ════════════ HEADER ════════════ -->
+<header class="bv-header">
+  <div class="bv-inner">
+
+    <!-- Logo -->
+    <a href="/" class="bv-logo" aria-label="BookVault home">
+      <div class="bv-logo-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(13,14,19,.9)"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </div>
+      <div class="bv-logo-label">
+        <span class="bv-logo-name">BookVault</span>
+        <span class="bv-logo-sub">Library Management</span>
+      </div>
+    </a>
+
+    <!-- Desktop nav links -->
+    <nav class="bv-links" aria-label="Main navigation">
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'profile' %}" class="bv-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="#" class="bv-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          Rented Books
+        </a>
+        <a href="{% url 'all_students' %}" class="bv-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          All Students
+        </a>
+        <a href="#" class="bv-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Available
+        </a>
+        <a href="{% url 'all_books' %}" class="bv-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          All Books
+        </a>
+      {% else %}
+        <a href="/" class="bv-link">Home</a>
+        <a href="{% url 'all_books' %}" class="bv-link">Browse Books</a>
+      {% endif %}
+    </nav>
+
+    <!-- Desktop right actions -->
+    <div class="bv-actions">
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'profile' %}" class="bv-chip" aria-label="Your profile">
+          <div class="bv-chip-av" aria-hidden="true">
+            {{ request.user.first_name|first|upper }}
+          </div>
+          {{ request.user.first_name }}
+        </a>
+      {% endif %}
+
+      {% if not request.user.is_authenticated %}
+      <a href="{% url 'author_reg' %}" class="bv-btn bv-btn-teal">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        Author
+      </a>
+      {% endif %}
+
+      <a href="{% url 'student_reg' %}" class="bv-btn bv-btn-gold">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(13,14,19,.85)"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        Student
+      </a>
+    </div>
+
+    <!-- Mobile hamburger -->
+    <button class="bv-burger" id="bvBurger"
+            aria-label="Open menu" aria-expanded="false" aria-controls="bvMob">
+      <span></span><span></span><span></span>
+    </button>
+
+  </div><!-- /.bv-inner -->
+
+  <!-- Mobile dropdown -->
+  <div class="bv-mob" id="bvMob" role="menu">
+    {% if request.user.is_authenticated %}
+      <a href="{% url 'profile' %}" class="bv-link" role="menuitem">Dashboard</a>
+      <a href="#" class="bv-link" role="menuitem">Rented Books</a>
+      <a href="{% url 'all_students' %}" class="bv-link">All Students</a>
+      <a href="#" class="bv-link" role="menuitem">Available</a>
+      <a href="{% url 'all_books' %}" class="bv-link" role="menuitem">All Books</a>
+    {% else %}
+      <a href="/" class="bv-link" role="menuitem">Home</a>
+      <a href="{% url 'all_books' %}" class="bv-link" role="menuitem">Browse Books</a>
+    {% endif %}
+    {% if not request.user.is_authenticated %}
+    <div class="bv-mob-actions">
+      <a href="{% url 'author_reg' %}" class="bv-btn bv-btn-teal">Author</a>
+      <a href="{% url 'student_reg' %}" class="bv-btn bv-btn-gold">Student</a>
+    </div>
+    {% endif %}
+  </div>
+
+</header>
+
+<script>
+  (function(){
+    var btn  = document.getElementById('bvBurger');
+    var menu = document.getElementById('bvMob');
+    if(!btn||!menu) return;
+    btn.addEventListener('click', function(){
+      var open = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+    document.addEventListener('click', function(e){
+      if(!btn.contains(e.target) && !menu.contains(e.target)){
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded','false');
+        btn.setAttribute('aria-label','Open menu');
+      }
+    });
+  })();
+</script>
+
+      {% block content %}
+        
+
+      {% endblock content %}
+
+      <!-- footer -->
+
+    
+  
+{% endblock dev %}

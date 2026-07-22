@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#0b0c10 !important; color:#eef0f5 !important; }
+  .err-page {
+    min-height: calc(100vh - 64px);
+    background: #0b0c10;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem; position: relative;
+  }
+  .err-page::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 40%, rgba(201,168,76,.07) 0%,transparent 55%),
+      radial-gradient(ellipse 50% 50% at 80% 70%, rgba(45,212,191,.05) 0%,transparent 55%);
+  }
+  .err-wrap {
+    position:relative; z-index:1;
+    text-align:center; max-width:500px;
+    animation:errIn .7s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes errIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  .err-code {
+    font-size:7rem; font-weight:800;
+    line-height:1; letter-spacing:-.05em;
+    background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.4));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+    margin-bottom:.5rem;
+  }
+  .err-icon {
+    width:72px; height:72px; border-radius:20px;
+    background:rgba(201,168,76,.08);
+    border:1px solid rgba(201,168,76,.18);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 1.5rem;
+  }
+  .err-icon svg { width:32px; height:32px; color:#c9a84c; }
+  .err-title { font-size:1.5rem; font-weight:800; color:#eef0f5; margin-bottom:.6rem; letter-spacing:-.02em; }
+  .err-sub   { font-size:.9rem; color:rgba(238,240,245,.45); line-height:1.7; margin-bottom:2rem; }
+
+  .err-actions { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; }
+  .err-btn {
+    display:inline-flex; align-items:center; gap:.45rem;
+    padding:.65rem 1.3rem; border-radius:10px;
+    font-size:.84rem; font-weight:600;
+    text-decoration:none; transition:all .2s;
+    font-family:'DM Sans',system-ui,sans-serif;
+  }
+  .err-btn-primary {
+    background:linear-gradient(135deg,#9a6a22,#c9a84c);
+    color:#0b0c10; box-shadow:0 3px 14px rgba(201,168,76,.25);
+  }
+  .err-btn-primary:hover { box-shadow:0 5px 20px rgba(201,168,76,.4); transform:translateY(-1px); }
+  .err-btn-ghost {
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    color:rgba(238,240,245,.55);
+  }
+  .err-btn-ghost:hover { background:rgba(255,255,255,.08); color:#eef0f5; }
+</style>
+
+<div class="err-page">
+  <div class="err-wrap">
+    <div class="err-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </div>
+    <div class="err-code">404</div>
+    <h1 class="err-title">Page not found</h1>
+    <p class="err-sub">
+      The page you're looking for doesn't exist or has been moved.<br>
+      Check the URL or head back to safety.
+    </p>
+    <div class="err-actions">
+      <a href="/" class="err-btn err-btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(11,12,16,.85)"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Go Home
+      </a>
+      <a href="{% url 'all_books' %}" class="err-btn err-btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        Browse Books
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

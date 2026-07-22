@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#0b0c10 !important; color:#eef0f5 !important; }
+
+  .bl-page {
+    min-height: calc(100vh - 64px);
+    background: #0b0c10;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 3rem 1.5rem;
+    position: relative;
+  }
+  .bl-page::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 60% 40% at 5%  10%, rgba(201,168,76,.07)  0%,transparent 55%),
+      radial-gradient(ellipse 45% 50% at 95% 90%, rgba(45,212,191,.05)  0%,transparent 55%);
+  }
+
+  .bl-inner {
+    position: relative; z-index:1;
+    max-width: 1200px; margin:0 auto;
+  }
+
+  /* ── Page header ── */
+  .bl-header {
+    display: flex; align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem; margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+  .bl-header-left {}
+  .bl-eyebrow {
+    display: inline-flex; align-items: center; gap:.4rem;
+    font-size:.7rem; font-weight:600;
+    color:#c9a84c; letter-spacing:.12em;
+    text-transform:uppercase; margin-bottom:.6rem;
+  }
+  .bl-eyebrow-dot {
+    width:5px; height:5px; border-radius:50%;
+    background:#c9a84c; box-shadow:0 0 6px rgba(201,168,76,.7);
+    animation:blPulse 2s ease-in-out infinite;
+  }
+  @keyframes blPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .bl-title {
+    font-size: clamp(1.6rem,3.5vw,2.2rem);
+    font-weight: 800; letter-spacing:-.03em;
+    color: #eef0f5; line-height:1.15;
+  }
+  .bl-title span {
+    background:linear-gradient(120deg,#e8c97a,#c9a84c);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .bl-subtitle {
+    margin-top:.5rem; font-size:.88rem;
+    color:rgba(238,240,245,.45); max-width:480px; line-height:1.6;
+  }
+
+  /* Book count badge */
+  .bl-count {
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.35rem .9rem;
+    background:rgba(201,168,76,.1);
+    border:1px solid rgba(201,168,76,.2);
+    border-radius:999px;
+    font-size:.75rem; font-weight:600; color:#e8c97a;
+    white-space:nowrap; align-self:flex-start; margin-top:.4rem;
+  }
+
+  /* ── Search / filter bar ── */
+  .bl-toolbar {
+    display:flex; align-items:center; gap:.75rem;
+    margin-bottom:2rem; flex-wrap:wrap;
+  }
+  .bl-search-wrap {
+    position:relative; flex:1; min-width:200px; max-width:360px;
+  }
+  .bl-search-icon {
+    position:absolute; left:.85rem; top:50%; transform:translateY(-50%);
+    color:rgba(238,240,245,.28); pointer-events:none;
+    display:flex;
+  }
+  .bl-search-icon svg { width:14px; height:14px; }
+  .bl-search {
+    width:100%;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:10px;
+    color:#eef0f5;
+    padding:.6rem .9rem .6rem 2.4rem;
+    font-size:.83rem;
+    font-family:'DM Sans',system-ui,sans-serif;
+    outline:none;
+    transition:border .2s, box-shadow .2s;
+    caret-color:#c9a84c;
+  }
+  .bl-search::placeholder { color:rgba(238,240,245,.2); }
+  .bl-search:focus {
+    border-color:rgba(201,168,76,.4);
+    box-shadow:0 0 0 3px rgba(201,168,76,.08);
+  }
+
+  .bl-filter-lbl {
+    font-size:.75rem; color:rgba(238,240,245,.38);
+    white-space:nowrap;
+  }
+
+  /* ── Grid ── */
+  .bl-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+    gap:1.25rem;
+  }
+
+  /* ── Book card ── */
+  .bl-card {
+    background:linear-gradient(160deg,rgba(255,255,255,.038) 0%,rgba(255,255,255,.015) 100%);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:18px;
+    padding:1.5rem;
+    position:relative; overflow:hidden;
+    display:flex; flex-direction:column;
+    transition:border .22s, transform .22s, box-shadow .22s;
+    cursor:default;
+    animation:blCardIn .4s ease both;
+  }
+  @keyframes blCardIn {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .bl-card:hover {
+    border-color:rgba(201,168,76,.28);
+    transform:translateY(-3px);
+    box-shadow:0 12px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(201,168,76,.1);
+  }
+  /* Top shimmer on hover */
+  .bl-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(201,168,76,.4),transparent);
+    opacity:0; transition:opacity .22s;
+  }
+  .bl-card:hover::before { opacity:1; }
+
+  /* Book ID tag */
+  .bl-card-id {
+    display:inline-flex; align-items:center; gap:.35rem;
+    font-size:.65rem; font-weight:600;
+    color:#c9a84c; letter-spacing:.1em;
+    text-transform:uppercase; margin-bottom:.75rem;
+  }
+  .bl-card-id-dot {
+    width:4px; height:4px; border-radius:50%;
+    background:#c9a84c; flex-shrink:0;
+  }
+
+  /* Book cover placeholder */
+  .bl-cover {
+    width:100%; height:130px; border-radius:10px;
+    background:linear-gradient(135deg,#111620,#1a2035);
+    border:1px solid rgba(255,255,255,.06);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:1rem; position:relative; overflow:hidden;
+    flex-shrink:0;
+  }
+  .bl-cover-icon { color:rgba(201,168,76,.2); }
+  .bl-cover-icon svg { width:40px; height:40px; }
+  /* Subtle gradient overlay */
+  .bl-cover::after {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(201,168,76,.04),transparent);
+  }
+
+  /* Title */
+  .bl-card-title {
+    font-size:.95rem; font-weight:700;
+    color:#eef0f5; letter-spacing:-.01em;
+    line-height:1.35; margin-bottom:.5rem;
+    flex-shrink:0;
+  }
+
+  /* Excerpt */
+  .bl-card-excerpt {
+    font-size:.78rem; line-height:1.7;
+    color:rgba(238,240,245,.45);
+    flex:1; margin-bottom:1.1rem;
+    display:-webkit-box; -webkit-line-clamp:3;
+    -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  /* View button */
+  .bl-view-btn {
+    display:flex; align-items:center; justify-content:center; gap:.45rem;
+    padding:.58rem 1rem; border-radius:9px;
+    background:rgba(201,168,76,.1);
+    border:1px solid rgba(201,168,76,.2);
+    color:#e8c97a;
+    font-size:.78rem; font-weight:600;
+    text-decoration:none;
+    transition:all .18s;
+    flex-shrink:0;
+  }
+  .bl-view-btn:hover {
+    background:rgba(201,168,76,.18);
+    border-color:rgba(201,168,76,.35);
+    transform:translateY(-1px);
+  }
+  .bl-view-btn svg { width:12px; height:12px; }
+
+  /* ── Empty state ── */
+  .bl-empty {
+    grid-column:1/-1;
+    display:flex; flex-direction:column; align-items:center; gap:1rem;
+    padding:4rem 2rem; text-align:center;
+  }
+  .bl-empty-icon {
+    width:64px; height:64px; border-radius:18px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .bl-empty-icon svg { width:28px; height:28px; color:rgba(238,240,245,.2); }
+  .bl-empty-title { font-size:1.05rem; font-weight:700; color:rgba(238,240,245,.5); }
+  .bl-empty-sub   { font-size:.83rem; color:rgba(238,240,245,.28); }
+
+  /* ── Responsive ── */
+  @media (max-width:600px) {
+    .bl-page { padding:2rem 1rem; }
+    .bl-grid { grid-template-columns:1fr; }
+    .bl-header { flex-direction:column; align-items:flex-start; }
+  }
+</style>
+
+<div class="bl-page">
+  <div class="bl-inner">
+
+    <!-- ═══ PAGE HEADER ═══ -->
+    <div class="bl-header">
+      <div class="bl-header-left">
+        <div class="bl-eyebrow">
+          <div class="bl-eyebrow-dot" aria-hidden="true"></div>
+          BookVault Catalogue
+        </div>
+        <h1 class="bl-title">Explore <span>All Books</span></h1>
+        <p class="bl-subtitle">
+          Browse our curated collection. Rent any book instantly and track it from your dashboard.
+        </p>
+      </div>
+      <div class="bl-count" aria-label="Total books available">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        {{ books|length }} Book{{ books|length|pluralize }} Available
+      </div>
+    </div>
+
+    <!-- ═══ SEARCH BAR ═══ -->
+    <div class="bl-toolbar">
+      <div class="bl-search-wrap">
+        <span class="bl-search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </span>
+        <input class="bl-search" type="search" id="blSearch"
+               placeholder="Search by title, author, ID…"
+               aria-label="Search books" autocomplete="off"/>
+      </div>
+      <span class="bl-filter-lbl" id="blFilterLbl" aria-live="polite"></span>
+    </div>
+
+    <!-- ═══ BOOKS GRID ═══ -->
+    <div class="bl-grid" id="blGrid" role="list" aria-label="Books catalogue">
+
+      {% for book in books %}
+      <div class="bl-card" role="listitem" data-title="{{ book.book_title|lower }}" data-id="{{ book.book_id }}">
+
+        <!-- Book ID -->
+        <div class="bl-card-id" aria-label="Book ID">
+          <div class="bl-card-id-dot" aria-hidden="true"></div>
+          #{{ book.book_id }}
+        </div>
+
+        <!-- Cover placeholder -->
+        <div class="bl-cover" aria-hidden="true">
+          <div class="bl-cover-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <h2 class="bl-card-title">{{ book.book_title }}</h2>
+
+        <!-- Excerpt -->
+        <p class="bl-card-excerpt">{{ book.book_content|truncatewords:18 }}</p>
+
+        <!-- CTA -->
+        <a href="{% url 'read_books' book.id %}" class="bl-view-btn" aria-label="View {{ book.book_title }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          View Book
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+
+      </div>
+      {% empty %}
+      <div class="bl-empty" role="status">
+        <div class="bl-empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div class="bl-empty-title">No books yet</div>
+        <div class="bl-empty-sub">Authors haven't published any books. Check back soon.</div>
+      </div>
+      {% endfor %}
+
+    </div><!-- /.bl-grid -->
+
+  </div><!-- /.bl-inner -->
+</div>
+
+<script>
+  /* ── Live client-side search ── */
+  (function(){
+    var input = document.getElementById('blSearch');
+    var lbl   = document.getElementById('blFilterLbl');
+    if (!input) return;
+
+    input.addEventListener('input', function(){
+      var q     = this.value.trim().toLowerCase();
+      var cards = document.querySelectorAll('#blGrid .bl-card');
+      var shown = 0;
+
+      cards.forEach(function(card){
+        var title = card.getAttribute('data-title') || '';
+        var id    = card.getAttribute('data-id')    || '';
+        var match = !q || title.includes(q) || id.includes(q);
+        card.style.display = match ? '' : 'none';
+        if (match) shown++;
+      });
+
+      lbl.textContent = q ? shown + ' result' + (shown !== 1 ? 's' : '') + ' for "' + input.value.trim() + '"' : '';
+    });
+  })();
+
+  /* ── Staggered card animation ── */
+  (function(){
+    var cards = document.querySelectorAll('.bl-card');
+    cards.forEach(function(card, i){
+      card.style.animationDelay = (i * 0.05) + 's';
+    });
+  })();
+</script>
+
+{% endblock content %}

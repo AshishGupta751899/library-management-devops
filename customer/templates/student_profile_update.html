@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  body { background:#0b0c10 !important; color:#eef0f5 !important; }
+
+  .pu-page {
+    min-height: calc(100vh - 64px);
+    background: #0b0c10;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem 1.5rem;
+    position: relative;
+  }
+  .pu-page::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 55% 45% at 8%  15%, rgba(201,168,76,.07) 0%,transparent 55%),
+      radial-gradient(ellipse 45% 55% at 92% 85%, rgba(45,212,191,.05) 0%,transparent 55%);
+  }
+
+  .pu-wrap {
+    position: relative; z-index:1;
+    width: 100%; max-width: 580px;
+    animation: puIn .6s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes puIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Page header ── */
+  .pu-header { margin-bottom: 1.5rem; }
+  .pu-eyebrow {
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-size:.68rem; font-weight:600; color:#c9a84c;
+    letter-spacing:.12em; text-transform:uppercase; margin-bottom:.55rem;
+  }
+  .pu-eyebrow-dot {
+    width:5px; height:5px; border-radius:50%;
+    background:#c9a84c; box-shadow:0 0 6px rgba(201,168,76,.7);
+    animation:puPulse 2s ease-in-out infinite;
+  }
+  @keyframes puPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .pu-title {
+    font-size:1.55rem; font-weight:800;
+    letter-spacing:-.03em; color:#eef0f5; line-height:1.2;
+  }
+  .pu-title span {
+    background:linear-gradient(120deg,#e8c97a,#c9a84c);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .pu-subtitle { margin-top:.35rem; font-size:.82rem; color:rgba(238,240,245,.4); }
+
+  /* ── Card ── */
+  .pu-card {
+    background: linear-gradient(160deg,rgba(255,255,255,.036) 0%,rgba(255,255,255,.014) 100%);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 22px; padding: 2rem;
+    position: relative; overflow: hidden;
+  }
+  .pu-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(201,168,76,.5),rgba(232,201,122,.3),transparent);
+  }
+
+  /* ── Avatar upload ── */
+  .pu-avatar-section {
+    display: flex; align-items: center; gap: 1.25rem;
+    padding: 1.1rem;
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+  }
+  .pu-avatar-preview {
+    width: 68px; height: 68px; border-radius: 50%; flex-shrink:0;
+    background: linear-gradient(135deg,#9a6a22,#c9a84c);
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(201,168,76,.3);
+    box-shadow: 0 0 0 3px rgba(201,168,76,.1);
+    overflow: hidden; position: relative;
+  }
+  .pu-avatar-preview svg { width:28px; height:28px; color:rgba(11,12,16,.7); }
+  .pu-avatar-preview img { width:100%; height:100%; object-fit:cover; display:none; }
+  .pu-avatar-info { flex:1; }
+  .pu-avatar-label { font-size:.82rem; font-weight:600; color:#eef0f5; margin-bottom:.25rem; }
+  .pu-avatar-hint  { font-size:.72rem; color:rgba(238,240,245,.38); line-height:1.5; }
+
+  /* Override Django file input */
+  .pu-avatar-section input[type=file] {
+    display:none !important;
+  }
+  .pu-file-btn {
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.4rem .85rem; border-radius:8px;
+    background:rgba(201,168,76,.1);
+    border:1px solid rgba(201,168,76,.22);
+    color:#e8c97a; font-size:.75rem; font-weight:600;
+    cursor:pointer; transition:all .18s;
+    margin-top:.5rem; width:fit-content;
+  }
+  .pu-file-btn:hover { background:rgba(201,168,76,.18); }
+  .pu-file-btn svg { width:12px; height:12px; }
+
+  /* ── Two-col row ── */
+  .pu-row { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+
+  /* ── Form fields ── */
+  .pu-field { margin-bottom:.95rem; }
+  .pu-field label {
+    display:block; margin-bottom:.4rem;
+    font-size:.68rem; font-weight:600;
+    color:rgba(238,240,245,.6);
+    text-transform:uppercase; letter-spacing:.08em;
+  }
+  .pu-input-wrap { position:relative; }
+  .pu-input-icon {
+    position:absolute; left:.88rem; top:50%; transform:translateY(-50%);
+    color:rgba(238,240,245,.25); pointer-events:none;
+    display:flex; transition:color .2s;
+  }
+  .pu-input-wrap:focus-within .pu-input-icon { color:#c9a84c; }
+
+  /* Textarea icon top-aligned */
+  .pu-input-wrap.textarea-wrap .pu-input-icon {
+    top:.75rem; transform:none;
+  }
+
+  /* Django widget override */
+  .pu-field input[type=text],
+  .pu-field input[type=email],
+  .pu-field input[type=tel],
+  .pu-field input[type=number],
+  .pu-field input[type=url],
+  .pu-field select,
+  .pu-field textarea {
+    width:100% !important;
+    background:rgba(255,255,255,.03) !important;
+    border:1px solid rgba(255,255,255,.07) !important;
+    border-radius:11px !important;
+    color:#eef0f5 !important;
+    padding:.68rem .9rem .68rem 2.5rem !important;
+    font-size:.86rem !important;
+    font-family:'DM Sans',system-ui,sans-serif !important;
+    outline:none !important;
+    transition:border .22s, box-shadow .22s, background .22s !important;
+    caret-color:#e8c97a !important;
+    box-sizing:border-box !important;
+  }
+  .pu-field textarea {
+    padding:.7rem .9rem .7rem 2.5rem !important;
+    min-height:110px !important;
+    line-height:1.65 !important;
+    resize:vertical !important;
+  }
+  .pu-field input::placeholder,
+  .pu-field textarea::placeholder { color:rgba(238,240,245,.18) !important; }
+  .pu-field input:hover,
+  .pu-field textarea:hover  { border-color:rgba(255,255,255,.12) !important; background:rgba(255,255,255,.04) !important; }
+  .pu-field input:focus,
+  .pu-field textarea:focus  {
+    border-color:rgba(201,168,76,.45) !important;
+    background:rgba(201,168,76,.03) !important;
+    box-shadow:0 0 0 3px rgba(201,168,76,.1) !important;
+  }
+
+  /* Char counter */
+  .pu-char-count { font-size:.68rem; color:rgba(238,240,245,.28); text-align:right; margin-top:.28rem; }
+
+  /* Errors */
+  .pu-field ul.errorlist { list-style:none !important; margin:.28rem 0 0 !important; padding:0 !important; }
+  .pu-field ul.errorlist li {
+    font-size:.7rem !important; color:#f87171 !important;
+    padding:.22rem .6rem !important;
+    background:rgba(248,113,113,.08) !important;
+    border:1px solid rgba(248,113,113,.22) !important;
+    border-radius:6px !important; margin-top:.2rem !important;
+  }
+  .pu-field ul.errorlist li::before { content:'⚠ '; }
+
+  /* ── Divider ── */
+  .pu-divider {
+    display:flex; align-items:center; gap:.6rem; margin:1.1rem 0;
+  }
+  .pu-divider-line { flex:1; height:1px; background:rgba(255,255,255,.06); }
+  .pu-divider-text { font-size:.68rem; color:rgba(238,240,245,.25); white-space:nowrap; }
+
+  /* ── Actions ── */
+  .pu-actions {
+    display:flex; gap:.65rem; align-items:center;
+    padding-top:1.25rem; margin-top:.5rem;
+    border-top:1px solid rgba(255,255,255,.06);
+  }
+  .pu-btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:.45rem;
+    padding:.72rem 1.4rem; border-radius:11px;
+    font-size:.86rem; font-weight:700;
+    border:none; cursor:pointer;
+    font-family:'DM Sans',system-ui,sans-serif;
+    text-decoration:none; transition:all .2s;
+    position:relative; overflow:hidden;
+  }
+  .pu-btn svg { width:13px; height:13px; flex-shrink:0; }
+  .pu-btn-save {
+    background:linear-gradient(135deg,#9a6a22,#c9a84c);
+    color:#0b0c10; flex:1;
+    box-shadow:0 3px 14px rgba(201,168,76,.25);
+  }
+  .pu-btn-save::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);
+    opacity:0; transition:opacity .2s;
+  }
+  .pu-btn-save:hover { box-shadow:0 6px 22px rgba(201,168,76,.4); transform:translateY(-1px); }
+  .pu-btn-save:hover::before { opacity:1; }
+  .pu-btn-save:active { transform:translateY(0); }
+  .pu-btn-save:disabled { opacity:.65; cursor:not-allowed; }
+
+  .pu-btn-cancel {
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08) !important;
+    color:rgba(238,240,245,.5);
+    padding:.72rem 1.1rem;
+  }
+  .pu-btn-cancel:hover { background:rgba(255,255,255,.08); color:#eef0f5; }
+
+  /* Ripple */
+  .pu-ripple {
+    position:absolute; border-radius:50%;
+    background:rgba(11,12,16,.25);
+    transform:scale(0);
+    animation:puRip .5s ease-out forwards; pointer-events:none;
+  }
+  @keyframes puRip  { to { transform:scale(4); opacity:0; } }
+  @keyframes puSpin { to { transform:rotate(360deg); } }
+
+  @media (max-width:520px) {
+    .pu-page { padding:2rem 1rem; align-items:flex-start; }
+    .pu-card { padding:1.4rem 1.1rem; }
+    .pu-row  { grid-template-columns:1fr; }
+    .pu-actions { flex-direction:column; }
+    .pu-btn-cancel { width:100%; }
+  }
+</style>
+
+<div class="pu-page">
+  <div class="pu-wrap">
+
+    <!-- ── Header ── -->
+    <div class="pu-header">
+      <div class="pu-eyebrow">
+        <div class="pu-eyebrow-dot" aria-hidden="true"></div>
+        Student Dashboard
+      </div>
+      <h1 class="pu-title">Update your <span>Profile</span></h1>
+      <p class="pu-subtitle">Keep your information up to date for the best experience.</p>
+    </div>
+
+    <!-- ── Card ── -->
+    <div class="pu-card">
+
+      <!-- ─── Django form — ALL fields preserved ─── -->
+      <form method="post" action="" novalidate enctype="multipart/form-data" id="puForm">
+        {% csrf_token %}
+
+        <!-- Avatar upload -->
+        <div class="pu-avatar-section">
+          <div class="pu-avatar-preview" id="puAvatarPreview">
+            <img id="puAvatarImg" alt="Profile preview"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="puAvatarPlaceholder" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="pu-avatar-info">
+            <div class="pu-avatar-label">Profile Photo</div>
+            <div class="pu-avatar-hint">JPG, PNG or GIF · Max 5MB<br>Recommended: 400×400px</div>
+            <!-- Hidden Django field -->
+            <div style="display:none" id="puImgFieldWrap">
+              {{ form.student_img }}
+              {{ form.student_img.errors }}
+            </div>
+            <label class="pu-file-btn" for="{{ form.student_img.id_for_label }}" role="button" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span id="puFileLabel">Choose Photo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Name + Mobile -->
+        <div class="pu-row">
+          <div class="pu-field">
+            {{ form.student_name.label_tag }}
+            <div class="pu-input-wrap">
+              <span class="pu-input-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              {{ form.student_name }}
+              {{ form.student_name.errors }}
+            </div>
+          </div>
+          <div class="pu-field">
+            {{ form.student_mob.label_tag }}
+            <div class="pu-input-wrap">
+              <span class="pu-input-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </span>
+              {{ form.student_mob }}
+              {{ form.student_mob.errors }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="pu-field">
+          {{ form.student_email.label_tag }}
+          <div class="pu-input-wrap">
+            <span class="pu-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </span>
+            {{ form.student_email }}
+            {{ form.student_email.errors }}
+          </div>
+        </div>
+
+        <!-- Education -->
+        <div class="pu-field">
+          {{ form.student_education.label_tag }}
+          <div class="pu-input-wrap">
+            <span class="pu-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+              </svg>
+            </span>
+            {{ form.student_education }}
+            {{ form.student_education.errors }}
+          </div>
+        </div>
+
+        <div class="pu-divider">
+          <div class="pu-divider-line"></div>
+          <span class="pu-divider-text">About yourself</span>
+          <div class="pu-divider-line"></div>
+        </div>
+
+        <!-- About -->
+        <div class="pu-field">
+          {{ form.student_about.label_tag }}
+          <div class="pu-input-wrap textarea-wrap">
+            <span class="pu-input-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="17" y1="10" x2="3" y2="10"/>
+                <line x1="21" y1="6"  x2="3" y2="6"/>
+                <line x1="21" y1="14" x2="3" y2="14"/>
+                <line x1="17" y1="18" x2="3" y2="18"/>
+              </svg>
+            </span>
+            {{ form.student_about }}
+            {{ form.student_about.errors }}
+          </div>
+          <div class="pu-char-count" id="puAboutCount">0 chars</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="pu-actions">
+          <button type="submit" class="pu-btn pu-btn-save" id="puSubmit">
+            <div id="puBtnInner" style="display:flex;align-items:center;gap:.45rem;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(11,12,16,.85)"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save Profile
+            </div>
+          </button>
+          <a href="{% url 'student_profile' %}" class="pu-btn pu-btn-cancel" aria-label="Cancel and go back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Cancel
+          </a>
+        </div>
+
+      </form>
+      <!-- ─────────────────────────────── -->
+
+    </div><!-- /.pu-card -->
+  </div><!-- /.pu-wrap -->
+</div>
+
+<script>
+  /* ── Avatar preview ── */
+  (function(){
+    var input     = document.querySelector('[name="student_img"]');
+    var img       = document.getElementById('puAvatarImg');
+    var placeholder = document.getElementById('puAvatarPlaceholder');
+    var fileLabel = document.getElementById('puFileLabel');
+    if (!input) return;
+    /* Show file input (hidden by CSS, label triggers it) */
+    input.style.display = 'block';
+    input.style.position = 'absolute';
+    input.style.opacity  = '0';
+    input.style.width    = '1px';
+    input.style.height   = '1px';
+    input.style.overflow = 'hidden';
+
+    input.addEventListener('change', function(){
+      if (this.files && this.files[0]){
+        var file = this.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e){
+          img.src = e.target.result;
+          img.style.display = 'block';
+          if (placeholder) placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+        fileLabel.textContent = file.name.length > 20
+          ? file.name.substring(0,18) + '…'
+          : file.name;
+      }
+    });
+  })();
+
+  /* ── About char counter ── */
+  (function(){
+    var ta  = document.querySelector('[name="student_about"]');
+    var lbl = document.getElementById('puAboutCount');
+    if (!ta || !lbl) return;
+    function update(){ lbl.textContent = ta.value.length + ' chars'; }
+    ta.addEventListener('input', update);
+    update();
+  })();
+
+  /* ── Ripple + loading ── */
+  (function(){
+    var btn  = document.getElementById('puSubmit');
+    var form = document.getElementById('puForm');
+    if (!btn || !form) return;
+    btn.addEventListener('click', function(e){
+      var r = document.createElement('span');
+      r.className = 'pu-ripple';
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      r.style.cssText =
+        'width:'+size+'px;height:'+size+'px;' +
+        'left:'+(e.clientX-rect.left-size/2)+'px;' +
+        'top:'+(e.clientY-rect.top-size/2)+'px;';
+      btn.appendChild(r);
+      setTimeout(function(){ r.remove(); }, 520);
+    });
+    form.addEventListener('submit', function(){
+      btn.disabled = true;
+      document.getElementById('puBtnInner').innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"' +
+        ' stroke="rgba(11,12,16,.85)" stroke-width="2.5" stroke-linecap="round"' +
+        ' style="animation:puSpin .75s linear infinite">' +
+        '<path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg> Saving…';
+    });
+  })();
+</script>
+
+{% endblock content %}
