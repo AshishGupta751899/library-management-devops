@@ -1,24 +1,74 @@
+# ==============================
 # Python
+# ==============================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
+# ==============================
 # Virtual Environment
+# ==============================
 venv/
+.venv/
+env/
+ENV/
 
-# Environment Variables
+# ==============================
+# Environment Variables / Secrets
+# ==============================
 .env
+.env.*
+!.env.example
 
+# ==============================
 # Django
+# ==============================
 db.sqlite3
 media/
+staticfiles/
 
-# VS Code
+# ==============================
+# VS Code / IDE
+# ==============================
 .vscode/
+.idea/
 
+# ==============================
 # Terraform
-.terraform/
+# ==============================
+**/.terraform/
 *.tfstate
+*.tfstate.*
 *.tfstate.backup
+*.pem
+*.key
 
+# Terraform sensitive/local variables
+**/terraform.tfvars
+
+# ==============================
+# Terraform Backup Files
+# ==============================
+*-backup.yaml
+*.backup
+
+# ==============================
 # Logs
+# ==============================
 *.log
+logs/
+
+# ==============================
+# OS
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Temporary Files
+# ==============================
+*.tmp
+*.temp
+*.swp
+*.swo

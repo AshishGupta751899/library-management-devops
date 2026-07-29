@@ -1,13 +1,18 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
+print("DB_HOST =", os.environ.get("DB_HOST"))
 
 # ── Security — env se lo ──
 SECRET_KEY    = os.environ.get('SECRET_KEY', '0kjdklji#jflkdjkjjdksjlkmvj94890uerejksdj')
 DEBUG         = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost,k8s-library-libraryi-2e189b1376-1174569033.ap-south-1.elb.amazonaws.com').split(',')
 
 
 INSTALLED_APPS = [

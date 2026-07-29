@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: library-management
+  namespace: library
+
+spec:
+
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: library-management
+
+  template:
+
+    metadata:
+      labels:
+        app: library-management
+
+    spec:
+
+      containers:
+
+      - name: library-management
+
+        image: 257076674897.dkr.ecr.ap-south-1.amazonaws.com/library-management:v1
+
+        ports:
+        - containerPort: 8000
+
+
+        envFrom:
+
+        - configMapRef:
+            name: library-db-config
+
+        - secretRef:
+            name: library-db-secret
+
+
+        resources:
+
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
