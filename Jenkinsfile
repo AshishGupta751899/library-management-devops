@@ -34,3 +34,22 @@ pipeline {
         }
     }
 }
+
+stage('Push to ECR') {
+    steps {
+        sh '''
+            AWS_REGION="ap-south-1"
+            AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+            ECR_REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/library-management"
+
+            aws ecr get-login-password --region ${AWS_REGION} | \
+            docker login --username AWS --password-stdin ${ECR_REPO}
+
+            docker tag library-management:${BUILD_NUMBER} ${ECR_REPO}:${BUILD_NUMBER}
+            docker tag library-management:${BUILD_NUMBER} ${ECR_REPO}:latest
+
+            docker push ${ECR_REPO}:${BUILD_NUMBER}
+            docker push ${ECR_REPO}:latest
+        '''
+    }
+}
