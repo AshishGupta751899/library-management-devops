@@ -17,5 +17,20 @@ pipeline {
                 sh 'kubectl version --client'
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t library-management:${BUILD_NUMBER} .
+                    docker tag library-management:${BUILD_NUMBER} library-management:latest
+                '''
+            }
+        }
+
+        stage('Docker Image Check') {
+            steps {
+                sh 'docker images | grep library-management'
+            }
+        }
     }
 }
