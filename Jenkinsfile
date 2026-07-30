@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_REGION = "ap-south-1"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -11,20 +15,24 @@ pipeline {
 
         stage('Verify') {
             steps {
-                sh 'echo "Library Management CI/CD Pipeline"'
-                sh 'git --version'
-                sh 'docker --version'
-                sh 'kubectl version --client'
-                sh 'aws --version'
+                sh '''
+                    echo "===== Library Management CI/CD Pipeline ====="
+
+                    git --version
+                    docker --version
+                    kubectl version --client
+                    aws --version
+                    trivy --version
+                '''
             }
         }
 
         stage('Cleanup Old Images') {
             steps {
                 sh '''
-                docker image prune -af || true
+                    docker image prune -af || true
                 '''
-             }
+            }
         }
 
         stage('Build Docker Image') {
@@ -64,8 +72,8 @@ pipeline {
         stage('Push to ECR') {
             steps {
                 sh '''
-                    AWS_REGION="ap-south-1"
                     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
                     ECR_REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/library-management"
 
                     echo "Logging in to ECR..."
@@ -85,7 +93,9 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 sh '''
-                    aws eks update-kubeconfig --region ap-south-1 --name library-eks
+                    aws eks update-kubeconfig \
+                    --region ap-south-1 \
+                    --name library-eks
 
                     kubectl apply -f k8s/namespace.yaml
                     kubectl apply -f k8s/configmap.yaml
@@ -111,7 +121,7 @@ pipeline {
                     echo "========== Ingress =========="
                     kubectl get ingress -n library
 
-                    echo "========== ALB URL =========="
+                    echo "========== ALB =========="
                     kubectl get ingress library-ingress -n library -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                     echo ""
                 '''
@@ -128,29 +138,22 @@ pipeline {
     post {
 
         success {
-            echo '==================================='
-            echo 'Pipeline Completed Successfully'
-            echo '==================================='
+            echo "====================================="
+            echo "Pipeline Completed Successfully"
+            echo "====================================="
         }
 
         failure {
-            echo '==================================='
-            echo 'Pipeline Failed'
-            echo '==================================='
+            echo "====================================="
+            echo "Pipeline Failed"
+            echo "====================================="
         }
 
-        always {
-            cleanWs()
-        }
-    }
-    
-    post {
         always {
             sh '''
                 docker system prune -af || true
             '''
+            cleanWs()
         }
-    
-        
     }
 }
