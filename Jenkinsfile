@@ -60,7 +60,7 @@ pipeline {
                     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
                     ECR_REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/library-management"
 
-                    echo "ECR Repository: ${ECR_REPO}"
+                    echo "Logging in to ECR..."
 
                     aws ecr get-login-password --region ${AWS_REGION} | \
                     docker login --username AWS --password-stdin ${ECR_REPO}
@@ -87,10 +87,25 @@ pipeline {
                     kubectl apply -f k8s/ingress.yaml
 
                     kubectl rollout status deployment/library-management -n library
+                '''
+            }
+        }
 
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    echo "========== Pods =========="
                     kubectl get pods -n library
+
+                    echo "========== Services =========="
                     kubectl get svc -n library
+
+                    echo "========== Ingress =========="
                     kubectl get ingress -n library
+
+                    echo "========== ALB URL =========="
+                    kubectl get ingress library-ingress -n library -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+                    echo ""
                 '''
             }
         }
@@ -103,12 +118,17 @@ pipeline {
     }
 
     post {
+
         success {
-            echo 'CI/CD Pipeline Completed Successfully!'
+            echo '==================================='
+            echo 'Pipeline Completed Successfully'
+            echo '==================================='
         }
 
         failure {
-            echo 'CI/CD Pipeline Failed!'
+            echo '==================================='
+            echo 'Pipeline Failed'
+            echo '==================================='
         }
 
         always {
