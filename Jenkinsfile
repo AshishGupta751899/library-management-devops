@@ -142,14 +142,15 @@ pipeline {
         always {
             cleanWs()
         }
-
-        post {
-            always {
-                sh '''
-                    docker system prune -af || true
+    }
+    
+    post {
+        always {
+            sh '''
+                docker system prune -af || true
             '''
-            }
         }
+    
         
     }
 }
