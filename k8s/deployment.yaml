@@ -25,7 +25,7 @@ spec:
 
       - name: library-management
 
-        image: 257076674897.dkr.ecr.ap-south-1.amazonaws.com/library-management:6
+        image: 257076674897.dkr.ecr.ap-south-1.amazonaws.com/library-management:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
