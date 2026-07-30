@@ -54,5 +54,27 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh '''
+                    aws eks update-kubeconfig --region ap-south-1 --name library-eks
+
+                    kubectl apply -f k8s/namespace.yaml
+                    kubectl apply -f k8s/configmap.yaml
+                    kubectl apply -f k8s/secret.yaml
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                    kubectl apply -f k8s/ingress.yaml
+
+                    kubectl rollout status deployment/library-management -n library
+
+                    kubectl get pods -n library
+                    kubectl get svc -n library
+                    kubectl get ingress -n library
+                '''
+            }
+        }
+
     }
 }
