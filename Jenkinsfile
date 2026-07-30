@@ -19,6 +19,14 @@ pipeline {
             }
         }
 
+        stage('Cleanup Old Images') {
+            steps {
+                sh '''
+                docker image prune -af || true
+                '''
+             }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh '''
@@ -134,5 +142,14 @@ pipeline {
         always {
             cleanWs()
         }
+
+        post {
+            always {
+                sh '''
+                    docker system prune -af || true
+            '''
+            }
+        }
+        
     }
 }
