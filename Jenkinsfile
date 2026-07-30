@@ -30,7 +30,26 @@ pipeline {
 
         stage('Docker Image Check') {
             steps {
-                sh 'docker images | grep library-management'
+                sh '''
+                    docker images | grep library-management
+                '''
+            }
+        }
+
+        stage('Trivy Scan') {
+            steps {
+                sh '''
+                    mkdir -p trivy-report
+
+                    trivy image \
+                    --severity HIGH,CRITICAL \
+                    --format table \
+                    --output trivy-report/trivy-report.txt \
+                    --exit-code 0 \
+                    library-management:${BUILD_NUMBER}
+
+                    cat trivy-report/trivy-report.txt
+                '''
             }
         }
 
@@ -76,5 +95,24 @@ pipeline {
             }
         }
 
+        stage('Archive Reports') {
+            steps {
+                archiveArtifacts artifacts: 'trivy-report/*', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI/CD Pipeline Completed Successfully!'
+        }
+
+        failure {
+            echo 'CI/CD Pipeline Failed!'
+        }
+
+        always {
+            cleanWs()
+        }
     }
 }
